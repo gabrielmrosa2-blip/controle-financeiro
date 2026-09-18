@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1220">
 <title>CONTROLE+ • Seu dinheiro, seu equilíbrio</title>
-<style>
+<style>.launch-list{display:grid;gap:10px}.launch-compact{padding:13px 14px;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:0 4px 16px rgba(15,35,70,.04)}.launch-top,.launch-meta,.launch-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px}.launch-title{display:flex;align-items:center;gap:8px;min-width:0}.launch-title b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.launch-meta{justify-content:flex-start;flex-wrap:wrap;margin:7px 0 9px;font-size:11px;color:var(--muted)}.launch-bottom{border-top:1px solid var(--line);padding-top:8px}.launch-bottom>div{display:flex;align-items:center;gap:7px;min-width:0}.launch-bottom small{color:var(--muted);font-size:10px}.launch-bottom .date-control{margin:0}
 :root{
  --bg:#f4f6fa;--surface:#fff;--surface2:#f8fafc;--text:#111827;--muted:#6b7280;--line:#e6eaf0;
  --navy:#0b1220;--blue:#2859d9;--blue2:#3b72ef;--gold:#c9a85b;--gold2:#e7d19a;
@@ -150,19 +150,19 @@ function switchArea(a){state.area=a;state.page='dashboard';renderShell();renderP
 function monthLabel(m){const [y,n]=m.split('-');return new Date(+y,+n-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase())}
 function monthMove(m,delta){const [y,n]=m.split('-').map(Number),d=new Date(y,n-1+delta,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
 function navItems(){return state.area==='pessoal'
- ? [['dashboard','⌂','Início'],['lancamentos','▤','Lançamentos'],['parcelamentos','▦','Parcelamentos'],['pagamentos','✓','Pagamentos'],['relatorios','◫','Relatórios'],['calendario','▣','Calendário'],['config','⚙','Configurações']]
+ ? [['dashboard','⌂','Início'],['lancamentos','▤','Lançamentos'],['parcelamentos','▦','Parcelamentos'],['relatorios','◫','Relatórios'],['calendario','▣','Calendário'],['config','⚙','Configurações']]
  : [['dashboard','⌂','Dashboard'],['membros','♙','Membros'],['mensalidades','◷','Mensalidades'],['lancmembros','＋','Lançamentos'],['historico','▤','Histórico'],['config','⚙','Configurações']]}
 
 function renderShell(){
  document.getElementById('sideArea').textContent=state.area==='pessoal'?'Controle Pessoal':'Controle do Terreiro';
  document.getElementById('eyebrow').textContent=state.area==='pessoal'?'CONTROLE PESSOAL':'CONTROLE DO TERREIRO';
- const titles={dashboard:'Dashboard',lancamentos:'Lançamentos',parcelamentos:'Parcelamentos',pagamentos:'Pagamentos',relatorios:'Relatórios',calendario:'Calendário Financeiro',config:'Configurações',membros:'Membros',mensalidades:'Mensalidades',lancmembros:'Lançamentos dos membros',historico:'Histórico'};
+ const titles={dashboard:'Dashboard',lancamentos:'Lançamentos',parcelamentos:'Parcelamentos',relatorios:'Relatórios',calendario:'Calendário Financeiro',config:'Configurações',membros:'Membros',mensalidades:'Mensalidades',lancmembros:'Lançamentos dos membros',historico:'Histórico'};
  document.getElementById('pageTitle').textContent=titles[state.page]||'Controle+';
  document.getElementById('subtitle').textContent=state.area==='pessoal'?`Visão de ${monthLabel('2026-09')}`:'Gestão independente do Terreiro';
  const side=document.getElementById('sideNav');side.innerHTML=navItems().map(([p,i,n])=>`<button class="${state.page===p?'active':''}" onclick="setPage('${p}')"><span class="icon">${i}</span>${n}</button>`).join('');
  const mobile=document.getElementById('mobileNav');let items=state.area==='pessoal'?navItems().slice(0,5):navItems().slice(0,5);
  mobile.innerHTML=items.map(([p,i,n])=>`<button class="${state.page===p?'active':''}" onclick="setPage('${p}')"><span class="mi">${i}</span>${n}</button>`).join('')+`<button onclick="switchArea('${state.area==='pessoal'?'terreiro':'pessoal'}')"><span class="mi">${state.area==='pessoal'?'⛩':'$'}</span>${state.area==='pessoal'?'Terreiro':'Pessoal'}</button>`;
- document.getElementById('headerAction').style.display=state.page==='dashboard'||state.page==='lancamentos'||state.page==='pagamentos'||state.page==='parcelamentos'||state.page==='lancmembros'?'block':'none';
+ document.getElementById('headerAction').style.display=state.page==='dashboard'||state.page==='lancamentos'||state.page==='parcelamentos'||state.page==='lancmembros'?'block':'none';
  document.getElementById('headerAction').textContent=state.area==='terreiro'?'＋ Novo lançamento':'＋ Novo lançamento';
 }
 function renderPage(){
@@ -172,7 +172,7 @@ function renderPage(){
  bindDateEvents();
 }
 function renderPersonalPages(p){
- p.innerHTML=`${dashboardPersonal()}${lancamentosPage()}${parcelamentosPage()}${pagamentosPage()}${relatoriosPage()}${calendarioPage()}${configPage()}`;
+ p.innerHTML=`${dashboardPersonal()}${lancamentosPage()}${parcelamentosPage()}${relatoriosPage()}${calendarioPage()}${configPage()}`;
 }
 function renderTerreiroPages(p){
  p.innerHTML=`${dashboardTerreiro()}${membrosPage()}${mensalidadesPage()}${lancMembrosPage()}${historicoPage()}${configPage()}`;
@@ -194,7 +194,7 @@ function dashboardPersonal(){
  <div class="section"><div class="section-head"><h2>Acesso rápido</h2></div><div class="quick-actions">
   <button class="quick" onclick="quickNew('DESPESA')"><b>− Nova despesa</b><small>Registrar saída</small></button>
   <button class="quick" onclick="quickNew('RECEITA')"><b>＋ Nova receita</b><small>Registrar entrada</small></button>
-  <button class="quick" onclick="openPaymentList()"><b>✓ Pagar conta</b><small>Contas em aberto</small></button>
+  <button class="quick" onclick="setPage('lancamentos')"><b>▤ Ver lançamentos</b><small>Contas e movimentações</small></button>
   <button class="quick" onclick="setPage('calendario')"><b>▣ Ver calendário</b><small>Agenda financeira</small></button>
  </div></div>
  <div class="grid2">
@@ -203,7 +203,7 @@ function dashboardPersonal(){
   <div class="section"><div class="section-head"><h2>Despesas por categoria</h2><button class="link" onclick="setPage('relatorios')">Detalhes →</button></div>
   ${cats.map(([k,v])=>`<div style="margin:12px 0"><div class="row" style="padding:0;border:0"><span style="font-size:12px">${esc(k)}</span><b style="font-size:12px">${money(v)}</b></div><div class="progress"><i style="width:${v/mx*100}%"></i></div></div>`).join('')||empty()}</div>
  </div>
- <div class="section"><div class="section-head"><h2>Próximos pagamentos</h2><button class="link" onclick="setPage('pagamentos')">Ver contas →</button></div>
+ <div class="section"><div class="section-head"><h2>Próximos pagamentos</h2></div>
  ${prox.map(x=>`<div class="row"><div class="row-main"><b>${esc(x.descricao)}</b><small>${fmt(x.data||x.vencimento)}</small></div><div class="row-right"><b>${money(Math.abs(x.valor))}</b><br>${pill(status(x))}</div></div>`).join('')||empty()}</div>
  </section>`;
 }
@@ -212,48 +212,12 @@ function lancamentosPage(){
  return `<section class="page" id="page-lancamentos"><div class="section"><div class="section-head"><div><h2>Lançamentos</h2><small style="color:var(--muted)">Controle pessoal</small></div><button class="btn" onclick="quickNew()">＋ Novo</button></div>
  <div class="toolbar"><input class="field search" placeholder="Pesquisar descrição ou categoria" value="${esc(state.lancSearch)}" oninput="state.lancSearch=this.value.toLowerCase();renderPage()"><select class="select" onchange="state.lancTipo=this.value;renderPage()"><option value="">Tipo: todos</option><option value="RECEITA" ${state.lancTipo==='RECEITA'?'selected':''}>Receitas</option><option value="DESPESA" ${state.lancTipo==='DESPESA'?'selected':''}>Despesas</option></select></div>
  <div class="toolbar"><div class="filter-group">${[['','Todos'],['PAGO','Pago'],['EM DIA','Em dia'],['ATRASADO','Atrasado']].map(([v,n])=>`<button class="filter ${state.lancStatus===v?'active':''}" onclick="state.lancStatus='${v}';renderPage()">${n}</button>`).join('')}</div></div>
- <div class="table-wrap"><table class="table"><thead><tr><th>Vencimento</th><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Data de pgto</th><th>Status</th><th></th></tr></thead><tbody>
- ${filtered.map(x=>`<tr><td>${fmt(x.data)}</td><td><span class="badge-type ${x.tipo==='RECEITA'?'r':'d'}">${x.tipo==='RECEITA'?'R':'D'}</span></td><td>${esc(x.categoria)}</td><td><b>${esc(x.descricao)}</b></td><td class="${x.tipo==='RECEITA'?'green':'red'}"><b>${money(x.valor)}</b></td><td>${dateControl('l',x.id,x.pagamento)}</td><td>${pill(status(x))}</td><td><button class="icon-btn" title="Repetir lançamento" onclick="repeatLaunch('${x.id}')">＋</button></td></tr>`).join('')||`<tr><td colspan="8">${empty()}</td></tr>`}
- </tbody></table></div></div></section>`;
-}
-function parcelamentosPage(){
- let a=data.parcelas.filter(x=>(!state.parcelStatus||status(x)===state.parcelStatus)&&(!state.parcelMonth||x.vencimento.startsWith(state.parcelMonth))).sort((a,b)=>a.vencimento.localeCompare(b.vencimento));
- return `<section class="page" id="page-parcelamentos"><div class="section"><div class="section-head"><div><h2>Parcelamentos</h2><small style="color:var(--muted)">Ordenados por vencimento</small></div><button class="btn" onclick="openParcelModal()">＋ Novo parcelamento</button></div>
- <div class="toolbar"><select class="select" onchange="state.parcelMonth=this.value;renderPage()"><option value="">Todos os meses</option>${monthOptions(2026,2028,state.parcelMonth)}</select><div class="filter-group">${[['','Todos'],['PAGO','Pago'],['EM DIA','Em dia'],['ATRASADO','Atrasado']].map(([v,n])=>`<button class="filter ${state.parcelStatus===v?'active':''}" onclick="state.parcelStatus='${v}';renderPage()">${n}</button>`).join('')}</div></div>
- <div class="table-wrap"><table class="table"><thead><tr><th>Descrição</th><th>Parcela</th><th>Vencimento</th><th>Valor</th><th>Data de pgto</th><th>Status</th><th></th></tr></thead><tbody>
- ${a.map(x=>`<tr><td><b>${esc(x.descricao)}</b></td><td>${x.parcela}/${x.total}</td><td>${fmt(x.vencimento)}</td><td class="red"><b>${money(x.valor)}</b></td><td>${dateControl('p',x.id,x.pagamento)}</td><td>${pill(status(x))}</td><td>${x.pagamento?'':payButton('p',x.id)}</td></tr>`).join('')||`<tr><td colspan="7">${empty('Nenhuma parcela encontrada.')}</td></tr>`}
- </tbody></table></div></div></section>`;
-}
-function pagamentosPage(){
- let a=[...data.lancamentos.map(x=>({...x,kind:'l',due:x.data})),...data.parcelas.map(x=>({...x,kind:'p',due:x.vencimento}))].sort((a,b)=>a.due.localeCompare(b.due));
- return `<section class="page" id="page-pagamentos"><div class="section"><div class="section-head"><div><h2>Contas e pagamentos</h2><small style="color:var(--muted)">Pague e registre a data em um toque</small></div></div>
- <div class="toolbar"><div class="filter-group">${[['','Todas'],['EM DIA','Em aberto'],['ATRASADO','Atrasadas'],['PAGO','Pagas']].map(([v,n])=>`<button class="filter ${state.payStatus===v?'active':''}" onclick="state.payStatus='${v}';renderPage()">${n}</button>`).join('')}</div><input class="field search" placeholder="Pesquisar conta..." oninput="state.paySearch=this.value.toLowerCase();renderPage()"></div>
- ${a.filter(x=>(!state.payStatus||status(x)===state.payStatus)&&(!state.paySearch||x.descricao.toLowerCase().includes(state.paySearch))).slice(0,60).map(x=>`<div class="row"><div class="row-main"><b>${esc(x.descricao)}</b><small>${fmt(x.due)} · ${x.kind==='p'?'Parcela '+x.parcela+'/'+x.total:x.categoria}</small></div><div class="row-right"><b class="${x.valor<0?'red':'green'}">${money(x.valor)}</b><div>${pill(status(x))}</div></div><div>${x.pagamento?`<small style="color:var(--green)">Pago em ${fmt(x.pagamento)}</small>`:`<button class="btn" style="padding:8px 12px;font-size:11px" onclick="payItem('${x.kind}','${x.id}')">Pagar</button>`}</div></div>`).join('')||empty('Nenhuma conta encontrada.')}</div></section>`;
-}
-function relatoriosPage(){
- const m=state.reportMonth,arr=data.lancamentos.filter(x=>x.data.startsWith(m)),rec=arr.filter(x=>x.tipo==='RECEITA').reduce((a,x)=>a+x.valor,0),des=arr.filter(x=>x.tipo==='DESPESA').reduce((a,x)=>a+Math.abs(x.valor),0);
- const months=[];for(let i=-5;i<=0;i++){const mm=monthMove(m,i);const aa=data.lancamentos.filter(x=>x.data.startsWith(mm));months.push({m:mm,r:aa.filter(x=>x.tipo==='RECEITA').reduce((a,x)=>a+x.valor,0),d:aa.filter(x=>x.tipo==='DESPESA').reduce((a,x)=>a+Math.abs(x.valor),0)})}
- const mx=Math.max(1,...months.flatMap(x=>[x.r,x.d]));const cats={};arr.filter(x=>x.tipo==='DESPESA').forEach(x=>cats[x.categoria]=(cats[x.categoria]||0)+Math.abs(x.valor));const top=Object.entries(cats).sort((a,b)=>b[1]-a[1]);
- return `<section class="page" id="page-relatorios"><div class="section"><div class="monthbar"><button class="chev" onclick="state.reportMonth=monthMove(state.reportMonth,-1);renderPage()">‹</button><strong>Relatório · ${monthLabel(m)}</strong><button class="chev" onclick="state.reportMonth=monthMove(state.reportMonth,1);renderPage()">›</button></div>
- <div class="cards" style="grid-template-columns:repeat(3,1fr)"><div class="card"><div class="label">Receitas</div><div class="money green">${money(rec)}</div></div><div class="card"><div class="label">Despesas</div><div class="money red">${money(des)}</div></div><div class="card primary"><div class="label">Saldo</div><div class="money">${money(rec-des)}</div></div></div>
- <div class="section" style="box-shadow:none;margin-top:16px"><div class="section-head"><h2>Receitas × Despesas</h2><div class="legend"><span><i class="dot g"></i>Receitas</span><span><i class="dot r"></i>Despesas</span></div></div><div class="chart">${months.map(x=>`<div class="barcol"><div class="bar rec" style="height:${Math.max(3,x.r/mx*125)}px"></div><div class="bar des" style="height:${Math.max(3,x.d/mx*125)}px"></div><div class="barlabel">${monthLabel(x.m).slice(0,3)}</div></div>`).join('')}</div></div>
- <div class="section" style="box-shadow:none;margin-top:0"><div class="section-head"><h2>Resumo por categoria</h2></div>${top.map(([k,v])=>`<div class="row"><span>${esc(k)}</span><b>${money(v)}</b></div>`).join('')||empty()}</div></div></section>`;
-}
-function calendarioPage(){
- const m=state.calendarMonth,[y,mo]=m.split('-').map(Number),first=new Date(y,mo-1,1),days=new Date(y,mo,0).getDate(),offset=first.getDay();let cells='';
- for(let i=0;i<offset;i++)cells+='<div></div>';
- for(let d=1;d<=days;d++){const ds=`${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`, items=[...data.lancamentos.filter(x=>x.data===ds),...data.parcelas.filter(x=>x.vencimento===ds)];const dots=[...new Set(items.map(x=>status(x)==='PAGO'?'g':status(x)==='ATRASADO'?'r':'a'))];cells+=`<button class="day ${ds===today()?'today':''}" onclick="calendarDay('${ds}')"><span class="daynum">${d}</span><div class="dots">${dots.map(c=>`<i class="${c}"></i>`).join('')}</div></button>`}
- return `<section class="page" id="page-calendario"><div class="section"><div class="monthbar"><button class="chev" onclick="state.calendarMonth=monthMove(state.calendarMonth,-1);renderPage()">‹</button><strong>${monthLabel(m)}</strong><button class="chev" onclick="state.calendarMonth=monthMove(state.calendarMonth,1);renderPage()">›</button></div><div class="calendar">${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(x=>`<div class="weekday">${x}</div>`).join('')}${cells}</div><div id="calendarDetail"></div></div></section>`;
-}
-function configPage(){
- return `<section class="page" id="page-config"><div class="section"><div class="section-head"><h2>Configurações</h2></div><div class="settings-list">
- <div class="setting"><div><b>Gerenciar categorias</b><br><small style="color:var(--muted)">Adicionar categorias ao lançamento</small></div><button onclick="manageCategories()">Abrir →</button></div>
- <div class="setting"><div><b>Exportar dados</b><br><small style="color:var(--muted)">Baixar seus dados em JSON</small></div><button onclick="exportJSON()">Exportar →</button></div>
- <div class="setting"><div><b>Backup rápido</b><br><small style="color:var(--muted)">Salvar uma cópia dos dados</small></div><button onclick="exportJSON()">Fazer backup →</button></div>
- <div class="setting"><div><b>Restaurar backup</b><br><small style="color:var(--muted)">Importar um JSON anteriormente salvo</small></div><button onclick="document.getElementById('restoreFile').click()">Restaurar →</button></div>
- <input id="restoreFile" type="file" accept=".json" style="display:none" onchange="restoreJSON(event)">
- <div class="setting"><div><b>Modo escuro</b><br><small style="color:var(--muted)">Alternar aparência</small></div><button class="toggle ${localStorage.getItem('controle_dark')==='1'?'on':''}" onclick="toggleDark(this)"><i></i></button></div>
- <div class="setting"><div><b>Limpar dados criados no dispositivo</b><br><small style="color:var(--muted)">Volta aos dados iniciais do aplicativo</small></div><button style="color:var(--red)" onclick="resetData()">Restaurar inicial</button></div>
+ <div class="launch-list">
+ ${filtered.map(x=>`<div class="launch-compact">
+   <div class="launch-top"><div class="launch-title"><span class="badge-type ${x.tipo==='RECEITA'?'r':'d'}">${x.tipo==='RECEITA'?'R':'D'}</span><b>${esc(x.descricao)}</b></div><b class="${x.tipo==='RECEITA'?'green':'red'}">${money(x.valor)}</b></div>
+   <div class="launch-meta"><span>${fmt(x.data)}</span><span>${esc(x.categoria)}</span><span>${pill(status(x))}</span></div>
+   <div class="launch-bottom"><div><small>Pgto.</small>${dateControl('l',x.id,x.pagamento)}</div><button class="icon-btn" title="Repetir lançamento" onclick="repeatLaunch('${x.id}')">＋</button></div>
+ </div>`).join('')||empty()}
  </div></div></section>`;
 }
 function dashboardTerreiro(){
@@ -288,7 +252,6 @@ function clearPayment(kind,id){setPayment(kind,id,null)}
 function payItem(kind,id){setPayment(kind,id,today())}
 function repeatLaunch(id){const x=data.lancamentos.find(y=>y.id===id);if(!x)return;openRepeatModal(x)}
 function quickNew(tipo='DESPESA'){openLaunchModal(tipo)}
-function openPaymentList(){setPage('pagamentos')}
 function openLaunchModal(tipo='DESPESA'){
  document.getElementById('modalBox').innerHTML=`<div class="modal-head"><h2>Novo lançamento</h2><button class="close" onclick="closeModal()">×</button></div>
  <form class="form-grid" onsubmit="saveLaunch(event)">
