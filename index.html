@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1220">
 <title>CONTROLE+ • Seu dinheiro, seu equilíbrio</title>
-<style>.launch-list{display:grid;gap:10px}.compact-toolbar{gap:8px;margin-bottom:8px}.compact-filters{margin-bottom:12px}.launch-compact{padding:13px 14px;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:0 4px 16px rgba(15,35,70,.04)}.launch-top,.launch-meta,.launch-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px}.launch-title{display:flex;align-items:center;gap:8px;min-width:0}.launch-title b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.launch-meta{justify-content:flex-start;flex-wrap:wrap;margin:7px 0 9px;font-size:11px;color:var(--muted)}.launch-bottom{border-top:1px solid var(--line);padding-top:8px}.launch-bottom>div{display:flex;align-items:center;gap:7px;min-width:0}.launch-bottom small{color:var(--muted);font-size:10px}.launch-bottom .date-control{margin:0}
+<style>.launch-name{display:flex;flex-direction:column;min-width:0}.launch-name small{font-size:10px;color:var(--muted);margin-top:2px}.launch-value{white-space:nowrap}.launch-compact{min-height:0}.launch-list{display:grid;gap:10px}.compact-toolbar{gap:8px;margin-bottom:8px}.compact-filters{margin-bottom:12px}.launch-compact{padding:13px 14px;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:0 4px 16px rgba(15,35,70,.04)}.launch-top,.launch-meta,.launch-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px}.launch-title{display:flex;align-items:center;gap:8px;min-width:0}.launch-title b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.launch-meta{justify-content:flex-start;flex-wrap:wrap;margin:7px 0 9px;font-size:11px;color:var(--muted)}.launch-bottom{border-top:1px solid var(--line);padding-top:8px}.launch-bottom>div{display:flex;align-items:center;gap:7px;min-width:0}.launch-bottom small{color:var(--muted);font-size:10px}.launch-bottom .date-control{margin:0}
 :root{
  --bg:#f4f6fa;--surface:#fff;--surface2:#f8fafc;--text:#111827;--muted:#6b7280;--line:#e6eaf0;
  --navy:#0b1220;--blue:#2859d9;--blue2:#3b72ef;--gold:#c9a85b;--gold2:#e7d19a;
@@ -187,10 +187,24 @@ function renderPage(){
  bindDateEvents();
 }
 function renderPersonalPages(p){
- p.innerHTML=`${dashboardPersonal()}${lancamentosPage()}${parcelamentosPage()}${relatoriosPage()}${calendarioPage()}${configPage()}`;
+ try{
+  const views={dashboard:dashboardPersonal,lancamentos:lancamentosPage,parcelamentos:parcelamentosPage,relatorios:relatoriosPage,calendario:calendarioPage,config:configPage};
+  const fn=views[state.page]||dashboardPersonal;
+  p.innerHTML=fn();
+ }catch(err){
+  console.error('Controle+ render:',err);
+  if(state.page==='lancamentos') p.innerHTML=lancamentosPageSafe(); else p.innerHTML=`<section class="page active"><div class="section"><b>Não foi possível carregar esta tela.</b><br><small>Seus dados continuam salvos. Recarregue a página para tentar novamente.</small></div></section>`;
+ }
 }
 function renderTerreiroPages(p){
- p.innerHTML=`${dashboardTerreiro()}${membrosPage()}${mensalidadesPage()}${lancMembrosPage()}${historicoPage()}${configPage()}`;
+ try{
+  const views={dashboard:dashboardTerreiro,membros:membrosPage,mensalidades:mensalidadesPage,lancmembros:lancMembrosPage,historico:historicoPage,config:configPage};
+  const fn=views[state.page]||dashboardTerreiro;
+  p.innerHTML=fn();
+ }catch(err){
+  console.error('Controle+ terreiro render:',err);
+  p.innerHTML=`<section class="page active"><div class="section"><b>Não foi possível carregar esta tela.</b></div></section>`;
+ }
 }
 function dashboardPersonal(){
  const m='2026-09', arr=data.lancamentos.filter(x=>x.data.startsWith(m)), rec=arr.filter(x=>x.tipo==='RECEITA').reduce((a,x)=>a+x.valor,0),des=arr.filter(x=>x.tipo==='DESPESA').reduce((a,x)=>a+Math.abs(x.valor),0);
@@ -223,24 +237,38 @@ function dashboardPersonal(){
  </section>`;
 }
 function lancamentosPage(){
- const years=[...new Set(data.lancamentos.map(x=>(x.data||'').slice(0,4)).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+ const list=Array.isArray(data.lancamentos)?data.lancamentos.filter(Boolean):[];
+ const years=[...new Set(list.map(x=>String(x.data||'').slice(0,4)).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
  if(state.lancYear && !years.includes(state.lancYear)) state.lancYear='';
- const filtered=data.lancamentos.filter(x=>
-  (!state.lancSearch||`${x.descricao||''} ${x.categoria||''}`.toLowerCase().includes(state.lancSearch))&&
-  (!state.lancTipo||x.tipo===state.lancTipo)&&
-  (!state.lancStatus||status(x)===state.lancStatus)&&
-  (!state.lancYear||(x.data||'').startsWith(state.lancYear))
- ).sort((a,b)=>a.data.localeCompare(b.data));
- return `<section class="page" id="page-lancamentos"><div class="section"><div class="section-head"><div><h2>Lançamentos</h2><small style="color:var(--muted)">Controle pessoal · ${filtered.length} registro${filtered.length===1?'':'s'}</small></div><button class="btn" onclick="quickNew()">＋ Novo</button></div>
- <div class="toolbar compact-toolbar"><input class="field search" placeholder="Pesquisar..." value="${esc(state.lancSearch)}" oninput="state.lancSearch=this.value.toLowerCase();renderPage()"><select class="select" onchange="state.lancYear=this.value;renderPage()"><option value="">Ano: todos</option>${years.map(y=>`<option value="${y}" ${state.lancYear===y?'selected':''}>${y}</option>`).join('')}</select><select class="select" onchange="state.lancTipo=this.value;renderPage()"><option value="">Tipo: todos</option><option value="RECEITA" ${state.lancTipo==='RECEITA'?'selected':''}>Receitas</option><option value="DESPESA" ${state.lancTipo==='DESPESA'?'selected':''}>Despesas</option></select></div>
- <div class="toolbar compact-filters"><div class="filter-group">${[['','Todos'],['PAGO','Pago'],['EM DIA','Em dia'],['ATRASADO','Atrasado']].map(([v,n])=>`<button class="filter ${state.lancStatus===v?'active':''}" onclick="state.lancStatus='${v}';renderPage()">${n}</button>`).join('')}</div></div>
- <div class="launch-list">
- ${filtered.map(x=>`<div class="launch-compact">
-   <div class="launch-top"><div class="launch-title"><span class="badge-type ${x.tipo==='RECEITA'?'r':'d'}">${x.tipo==='RECEITA'?'R':'D'}</span><b>${esc(x.descricao)}</b></div><b class="${x.tipo==='RECEITA'?'green':'red'}">${money(x.valor)}</b></div>
-   <div class="launch-meta"><span>Venc. ${fmt(x.data)}</span><span>${esc(x.categoria)}</span><span>${pill(status(x))}</span></div>
-   <div class="launch-bottom"><div><small>Pagamento</small>${dateControl('l',x.id,x.pagamento)}</div><button class="icon-btn" title="Repetir lançamento" aria-label="Repetir lançamento" onclick="repeatLaunch('${x.id}')">＋</button></div>
- </div>`).join('')||empty('Nenhum lançamento encontrado.')}
- </div></div></section>`;
+ const search=String(state.lancSearch||'').toLowerCase();
+ const filtered=list.filter(x=>{
+  const text=`${x.descricao||''} ${x.categoria||''}`.toLowerCase();
+  return (!search||text.includes(search))&&(!state.lancTipo||x.tipo===state.lancTipo)&&(!state.lancStatus||status(x)===state.lancStatus)&&(!state.lancYear||String(x.data||'').startsWith(state.lancYear));
+ }).sort((a,b)=>String(a.data||'').localeCompare(String(b.data||'')));
+ return `<section class="page" id="page-lancamentos">
+ <div class="section launch-section">
+  <div class="section-head"><div><h2>Lançamentos</h2><small style="color:var(--muted)">${filtered.length} registro${filtered.length===1?'':'s'}</small></div><button class="btn" onclick="quickNew()">＋ Novo</button></div>
+  <div class="toolbar compact-toolbar">
+   <input class="field search" placeholder="Pesquisar..." value="${esc(state.lancSearch||'')}" oninput="state.lancSearch=this.value.toLowerCase();renderPage()">
+   <select class="select" onchange="state.lancYear=this.value;renderPage()"><option value="">Ano: todos</option>${years.map(y=>`<option value="${y}" ${state.lancYear===y?'selected':''}>${y}</option>`).join('')}</select>
+   <select class="select" onchange="state.lancTipo=this.value;renderPage()"><option value="">Tipo: todos</option><option value="RECEITA" ${state.lancTipo==='RECEITA'?'selected':''}>Receitas</option><option value="DESPESA" ${state.lancTipo==='DESPESA'?'selected':''}>Despesas</option></select>
+  </div>
+  <div class="toolbar compact-filters"><div class="filter-group">${[['','Todos'],['PAGO','Pago'],['EM DIA','Em dia'],['ATRASADO','Atrasado']].map(([v,n])=>`<button class="filter ${state.lancStatus===v?'active':''}" onclick="state.lancStatus='${v}';renderPage()">${n}</button>`).join('')}</div></div>
+  <div class="launch-list">
+   ${filtered.map(x=>{
+    const tipo=x.tipo==='RECEITA'?'R':'D', cls=x.tipo==='RECEITA'?'r':'d';
+    return `<article class="launch-compact">
+      <div class="launch-top"><div class="launch-title"><span class="badge-type ${cls}">${tipo}</span><div class="launch-name"><b>${esc(x.descricao||'Sem descrição')}</b><small>${esc(x.categoria||'Sem categoria')}</small></div></div><b class="launch-value ${x.tipo==='RECEITA'?'green':'red'}">${money(x.valor)}</b></div>
+      <div class="launch-meta"><span>Venc. ${fmt(x.data)}</span><span>${pill(status(x))}</span></div>
+      <div class="launch-bottom"><div><small>Pagamento</small>${dateControl('l',x.id,x.pagamento)}</div><button class="icon-btn" title="Repetir lançamento" aria-label="Repetir lançamento" onclick="repeatLaunch('${x.id}')">＋</button></div>
+    </article>`;
+   }).join('')||empty('Nenhum lançamento encontrado.')}
+  </div>
+ </div></section>`;
+}
+function lancamentosPageSafe(){
+ const list=Array.isArray(data.lancamentos)?data.lancamentos.filter(Boolean):[];
+ return `<section class="page active" id="page-lancamentos"><div class="section"><div class="section-head"><div><h2>Lançamentos</h2><small style="color:var(--muted)">${list.length} registros</small></div><button class="btn" onclick="quickNew()">＋ Novo</button></div><div class="launch-list">${list.map(x=>`<article class="launch-compact"><div class="launch-top"><div class="launch-title"><span class="badge-type ${x.tipo==='RECEITA'?'r':'d'}">${x.tipo==='RECEITA'?'R':'D'}</span><div class="launch-name"><b>${esc(x.descricao||'Sem descrição')}</b><small>${esc(x.categoria||'Sem categoria')}</small></div></div><b class="launch-value ${x.tipo==='RECEITA'?'green':'red'}">${money(x.valor)}</b></div><div class="launch-meta"><span>Venc. ${fmt(x.data)}</span><span>${pill(status(x))}</span></div><div class="launch-bottom"><div><small>Pagamento</small>${dateControl('l',x.id,x.pagamento)}</div><button class="icon-btn" onclick="repeatLaunch('${x.id}')">＋</button></div></article>`).join('')||empty('Nenhum lançamento cadastrado.')}</div></div></section>`;
 }
 function dashboardTerreiro(){
  const m=state.memberMonth,members=data.membros||[], paid=members.filter(x=>memberStatus(x,m)==='PAGO').length, late=members.filter(x=>memberStatus(x,m)==='ATRASADO').length,on=members.filter(x=>memberStatus(x,m)==='EM DIA').length;
