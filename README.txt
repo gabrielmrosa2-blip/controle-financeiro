@@ -1,8 +1,13 @@
-CONTROLE+ — ATUALIZAÇÃO CONTROLE DO TERREIRO
+CONTROLE+ — ATUALIZAÇÃO REPARADA
 
-A tela inicial continua sendo o Controle Pessoal.
-O Controle do Terreiro agora fica em uma área separada do menu.
+Correções:
+- Corrigido erro de JavaScript que impedia o app de executar.
+- Restaurada a automação de repetir lançamentos.
+- Restaurados os botões e ações do Controle Pessoal.
+- Mantido o Controle do Terreiro como área separada.
+- Mantida a troca entre Controle Pessoal e Controle do Terreiro.
+- Lançamentos do Terreiro não entram no financeiro pessoal.
 
-Regra: nenhum lançamento do Controle do Terreiro entra no saldo, receitas, despesas, pagamentos ou relatórios do Controle Pessoal.
-
-Atualização: substitua o index.html do GitHub por este arquivo e faça o commit na branch main. O Netlify fará o deploy automaticamente.
+Instalação:
+Substitua o index.html do GitHub por este arquivo e faça Commit changes.
+O Netlify fará o novo deploy automaticamente.

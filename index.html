@@ -219,7 +219,7 @@ function renderLanc(){
   const ay=document.getElementById('anosLanc');
   if(ay){
     const atual=ay.dataset.ano||'';
-    ay.innerHTML='<button class="btn '+(!atual?'':'white')+'" style="padding:7px 11px" onclick="setAnoLanc('')">Todos</button>'+anos.map(a=>'<button class="btn '+(atual===a?'':'white')+'" style="padding:7px 11px" onclick="setAnoLanc(\''+a+'\')">'+a+'</button>').join('');
+    ay.innerHTML = '<button class="btn '+(!atual?'':'white')+'" style="padding:7px 11px" onclick="setAnoLanc(\'\')">Todos</button>' + anos.map(a => '<button class="btn '+(atual===a?'':'white')+'" style="padding:7px 11px" onclick="setAnoLanc(\''+a+'\')">'+a+'</button>').join('');
   }
   let ano=ay?.dataset.ano||'';
   let a=L.filter(x=>(!ano||(x.data||'').slice(0,4)===ano)&&(!q||x.descricao.toLowerCase().includes(q))&&(!t||x.tipo===t));
@@ -228,11 +228,26 @@ function renderLanc(){
     return '<tr><td>'+FM(x.data)+'</td><td><b style="color:'+(x.tipo==='RECEITA'?'#16a34a':'#dc2626')+'">'+tipo+'</b></td><td>'+x.categoria+'</td><td>'+x.descricao+'</td><td class="'+(x.tipo==='RECEITA'?'green':'red')+'">'+M(x.valor)+'</td><td><input type="date" value="'+(x.pagamento||'')+'" onchange="setPagamento('+i+',this.value)" style="border:1px solid var(--line);border-radius:8px;padding:7px;max-width:120px"></td><td><span class="pill '+C(st)+'">'+st+'</span></td><td><button class="btn white" style="padding:7px 9px" onclick="repetirLancamento('+i+')">Repetir</button>'+(x.pagamento?'':' <button class="btn" style="padding:7px 9px" onclick="payL('+i+')">Pagar</button>')+'</td></tr>';
   }).join('');
 }
+function repetirLancamento(i){
+  const x=L[i];
+  if(!x)return;
+  let n=Number(prompt('Quantas vezes deseja repetir este lançamento?','1'));
+  if(!Number.isFinite(n)||n<1)return;
+  n=Math.min(Math.floor(n),240);
+  for(let k=1;k<=n;k++){
+    const d=new Date((x.data||'2026-09-17')+'T12:00:00');
+    d.setMonth(d.getMonth()+k);
+    L.push({data:d.toISOString().slice(0,10),tipo:x.tipo,categoria:x.categoria,descricao:x.descricao,valor:x.valor,pagamento:null});
+  }
+  L.sort((a,b)=>new Date(a.data)-new Date(b.data));
+  render();
+}
 function setPagamento(i,data){
   L[i].pagamento=data||null;
   render();
 }
-function setAnoLanc(ano){const el=document.getElementById('anosLanc');if(el)el.dataset.ano=ano;renderLanc()}\nfunction renderP(){
+function setAnoLanc(ano){const el=document.getElementById('anosLanc');if(el)el.dataset.ano=ano;renderLanc()}
+function renderP(){
   const sel=document.getElementById('filtroMes');
   const meses=[...new Set(P.map(x=>(x.vencimento||'').slice(0,7)).filter(Boolean))].sort();
   if(sel){
