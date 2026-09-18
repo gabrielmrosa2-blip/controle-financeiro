@@ -4,34 +4,50 @@
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}.side{position:fixed;left:0;top:0;bottom:0;width:235px;background:#111827;color:#fff;padding:24px 14px}.brand{font-size:21px;font-weight:800;padding:8px 12px 28px}.brand small{display:block;font-size:11px;color:#9ca3af;margin-top:5px;font-weight:500}.nav button{display:block;width:100%;padding:12px;border:0;background:none;color:#cbd5e1;text-align:left;border-radius:9px;margin:3px 0;font-size:14px;cursor:pointer}.nav button:hover,.nav .active{background:#1f2937;color:#fff}.main{margin-left:235px;padding:28px;max-width:1500px}.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.top h1{margin:0;font-size:27px}.top p{margin:4px 0;color:var(--muted);font-size:13px}.btn{background:var(--blue);color:#fff;border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer}.btn.white{background:#fff;color:var(--text);border:1px solid var(--line)}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.card,.section{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px;box-shadow:0 6px 24px rgba(15,23,42,.05)}.label{font-size:12px;color:var(--muted)}.money{font-size:24px;font-weight:800;margin-top:7px}.green{color:var(--green)}.red{color:var(--red)}.amber{color:var(--amber)}.grid{display:grid;grid-template-columns:1.4fr .8fr;gap:16px;margin-top:16px}.section{margin-top:16px}.grid .section{margin-top:0}.section h2{font-size:16px;margin:0 0 13px}.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px}.row:last-child{border-bottom:0}.pill{font-size:10px;font-weight:800;padding:5px 8px;border-radius:99px;background:#fef3c7}.pill.green{background:#dcfce7}.pill.red{background:#fee2e2}.toolbar{display:flex;gap:8px;margin-bottom:14px}.input,.select{border:1px solid var(--line);border-radius:9px;padding:10px;background:#fff}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{padding:11px 9px;border-bottom:1px solid var(--line);text-align:left}.table th{font-size:10px;color:var(--muted);text-transform:uppercase}.scroll{overflow:auto}.modal{display:none;position:fixed;inset:0;background:#0007;align-items:center;justify-content:center;padding:18px}.modal.show{display:flex}.box{background:#fff;width:min(520px,100%);padding:20px;border-radius:16px}.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form label{font-size:12px;color:var(--muted)}.form input,.form select{display:block;width:100%;margin-top:5px;border:1px solid var(--line);border-radius:9px;padding:10px}.full{grid-column:1/-1}.mobile{display:none}
 @media(max-width:850px){.side{display:none}.main{margin:0;padding:17px 15px 78px}.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.mobile{display:flex;position:fixed;bottom:0;left:0;right:0;background:#111827;z-index:20;justify-content:space-around;padding:7px}.mobile button{border:0;background:none;color:#d1d5db;font-size:11px}.table{min-width:700px}}
 </style></head><body>
-<aside class="side"><div class="brand">CONTROLE<span style="color:#60a5fa">+</span><small>Protótipo do seu controle financeiro</small></div><div class="nav">
-<button class="active" onclick="go('dashboard',this)">⌂ Dashboard</button><button onclick="go('lancamentos',this)">▤ Lançamentos</button><button onclick="go('parcelamentos',this)">▦ Parcelamentos</button><button onclick="go('pagamentos',this)">✓ Pagamentos</button><button onclick="go('mensalidades',this)">◉ Mensalidades</button><button onclick="go('relatorios',this)">◫ Relatórios</button></div></aside>
+<aside class="side"><div class="brand">CONTROLE<span style="color:#60a5fa">+</span><small>Controle pessoal e do terreiro</small></div><div class="nav" id="navPessoal"><div style="padding:8px 12px 4px;color:#94a3b8;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em">Controle Pessoal</div><button class="active" onclick="go('dashboard',this)">⌂ Dashboard</button><button onclick="go('lancamentos',this)">▤ Lançamentos</button><button onclick="go('parcelamentos',this)">▦ Parcelamentos</button><button onclick="go('pagamentos',this)">✓ Pagamentos</button><button onclick="go('relatorios',this)">◫ Relatórios</button><div style="height:10px"></div><button onclick="go('terreiro',this)" style="background:#172033;color:#fff;font-weight:800">⛩ Controle do Terreiro →</button></div><div class="nav" id="navTerreiro" style="display:none"><div style="padding:8px 12px 4px;color:#94a3b8;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em">Controle do Terreiro</div><button class="active" onclick="go('terreiro',this)">⛩ Dashboard do Terreiro</button><button onclick="go('terreiro',this)">👥 Membros</button><button onclick="go('terreiro',this)">◉ Mensalidades</button><button onclick="go('terreiro',this)">▤ Lançamentos dos Membros</button><button onclick="go('terreiro',this)">📋 Histórico</button><div style="height:10px"></div><button onclick="go('dashboard',this)" style="background:#172033;color:#fff;font-weight:800">💰 ← Controle Pessoal</button></div></aside>
 <main class="main"><div class="top"><div><h1 id="title">Dashboard</h1><p>Controle financeiro • Setembro 2026</p></div><button class="btn" onclick="openModal()">+ Novo lançamento</button></div>
 <section id="dashboard" class="page"><div class="cards"><div class="card"><div class="label">Receitas</div><div id="rec" class="money green"></div></div><div class="card"><div class="label">Despesas</div><div id="des" class="money red"></div></div><div class="card"><div class="label">Saldo</div><div id="sal" class="money"></div></div><div class="card"><div class="label">Em aberto</div><div id="abe" class="money amber"></div></div></div>
 <div class="grid"><div class="section"><h2>Movimentações recentes</h2><div id="recentes"></div></div><div class="section"><h2>Despesas por categoria</h2><div id="cats"></div></div></div><div class="section"><h2>Próximos pagamentos</h2><div id="prox"></div></div></section>
-<section id="lancamentos" class="page" style="display:none"><div class="section"><h2>Lançamentos</h2><div class="toolbar"><input id="busca" class="input" placeholder="Pesquisar..." oninput="renderLanc()"><select id="ft" class="select" onchange="renderLanc()"><option value="">Todos</option><option>RECEITA</option><option>DESPESA</option></select></div><div class="scroll"><table class="table"><thead><tr><th>Data</th><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Status</th></tr></thead><tbody id="tl"></tbody></table></div></div></section>
-<section id="parcelamentos" class="page" style="display:none"><div class="section"><h2>Parcelamentos</h2><div class="toolbar"><button class="btn" onclick="openModal(true)">+ Novo parcelamento</button></div><div class="scroll"><table class="table"><thead><tr><th>Descrição</th><th>Parcela</th><th>Vencimento</th><th>Valor</th><th>Status</th><th></th></tr></thead><tbody id="tp"></tbody></table></div></div></section>
+<section id="lancamentos" class="page" style="display:none"><div class="section"><h2>Lançamentos</h2><div class="toolbar"><input id="busca" class="input" placeholder="Pesquisar..." oninput="renderLanc()"><select id="ft" class="select" onchange="renderLanc()"><option value="">Todos</option><option>RECEITA</option><option>DESPESA</option></select></div>
+<div id="anosLanc" style="display:flex;gap:7px;flex-wrap:wrap;margin:-2px 0 14px"></div><div class="scroll"><table class="table"><thead><tr><th>Data</th><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Pgto</th><th>Status</th><th></th></tr></thead><tbody id="tl"></tbody></table></div></div></section>
+<section id="parcelamentos" class="page" style="display:none"><div class="section"><h2>Parcelamentos</h2>
+<div class="toolbar" style="margin-bottom:12px">
+<label style="min-width:180px">Visualizar por
+<select id="filtroMes" onchange="renderP()">
+<option value="TODOS">Todos os meses</option>
+</select>
+</label>
+<label style="min-width:180px">Ordenação
+<select id="ordemParc" onchange="renderP()">
+<option value="MES">Por mês</option>
+<option value="ATRASADOS">Atrasados primeiro</option>
+</select>
+</label>
+</div><div class="toolbar"><button class="btn" onclick="openModal(true)">+ Novo parcelamento</button></div><div class="scroll"><table class="table"><thead><tr><th>Tipo</th><th>Pmt</th><th>De</th><th>Parcelas</th><th>Data pmt</th><th>VALOR</th><th>Data pgt</th><th>Status</th><th></th></tr></thead><tbody id="tp"></tbody></table></div></div></section>
 <section id="pagamentos" class="page" style="display:none"><div class="section"><h2>Contas e pagamentos</h2><div id="pag"></div></div></section>
-<section id="mensalidades" class="page" style="display:none">
+<section id="terreiro" class="page" style="display:none">
 <div class="section">
-<h2>Mensalidades</h2>
-<p style="color:#697386;font-size:13px;margin-top:-5px">Controle separado do seu financeiro pessoal.</p>
-<div class="cards" style="grid-template-columns:repeat(3,1fr);margin:15px 0">
-<div class="card"><div class="label">Valor mensal</div><div id="mvalor" class="money"></div></div>
-<div class="card"><div class="label">Próximo vencimento</div><div id="mvence" class="money amber"></div></div>
-<div class="card"><div class="label">Situação</div><div id="msituacao" class="money"></div></div>
-</div>
+<h2>Controle do Terreiro</h2>
+<p style="color:#697386;font-size:13px;margin-top:-5px">Área independente do controle pessoal. Nenhum lançamento daqui entra no seu financeiro pessoal.</p>
 <div class="toolbar">
-<button class="btn" onclick="openMensalidade()">Configurar mensalidade</button>
-<button class="btn white" onclick="marcarMensalidade()">Marcar como paga</button>
+<select id="mesMembros" class="select" onchange="renderMembros()"></select>
+<button class="btn" onclick="openMembro()">+ Novo membro</button>
+<button class="btn white" onclick="openLancMembro()">+ Lançamento do membro</button>
 </div>
-<div id="mensalidadeInfo"></div>
+<div class="cards" style="grid-template-columns:repeat(3,1fr);margin:15px 0">
+<div class="card"><div class="label">Em dia</div><div id="mEmDia" class="money green">0 membros</div></div>
+<div class="card"><div class="label">Atrasado</div><div id="mAtrasado" class="money red">0 membros</div></div>
+<div class="card"><div class="label">Pago</div><div id="mPago" class="money green">0 membros</div></div>
+</div>
+<div class="section" style="margin:0">
+<h2>Membros</h2>
+<div class="scroll"><table class="table"><thead><tr><th>Membro</th><th>Mensalidade</th><th>Vencimento</th><th>Data pgto</th><th>Status</th><th>Dados</th></tr></thead><tbody id="tmembros"></tbody></table></div>
+</div>
 </div>
 </section>
-
 <section id="relatorios" class="page" style="display:none"><div class="section"><h2>Relatório 2026</h2><div id="rel"></div></div></section>
 </main>
-<div class="mobile"><button onclick="go('dashboard',this)">⌂<br>Início</button><button onclick="go('lancamentos',this)">▤<br>Lanç.</button><button onclick="openModal()">＋<br>Lançar</button><button onclick="go('parcelamentos',this)">▦<br>Parcelas</button><button onclick="go('mensalidades',this)">◉<br>Mensal.</button><button onclick="go('relatorios',this)">◫<br>Relatório</button></div>
+<div class="mobile" id="mobilePessoal"><button onclick="go('dashboard',this)">⌂<br>Início</button><button onclick="go('lancamentos',this)">▤<br>Lanç.</button><button onclick="openModal()">＋<br>Lançar</button><button onclick="go('parcelamentos',this)">▦<br>Parcelas</button><button onclick="go('relatorios',this)">◫<br>Relatório</button><button onclick="go('terreiro',this)">⛩<br>Terreiro</button></div><div class="mobile" id="mobileTerreiro" style="display:none"><button onclick="go('terreiro',this)">⛩<br>Início</button><button onclick="go('terreiro',this)">👥<br>Membros</button><button onclick="go('terreiro',this)">◉<br>Mensal.</button><button onclick="go('terreiro',this)">▤<br>Lanç.</button><button onclick="go('dashboard',this)">💰<br>Pessoal</button></div>
 
 <div id="mmodal" class="modal"><div class="box">
 <div class="top"><h2 style="margin:0;font-size:18px">Configurar mensalidade</h2><button class="btn white" onclick="closeMensalidade()">Fechar</button></div>
@@ -42,16 +58,50 @@
 <div class="full" style="color:#697386;font-size:12px">O controle fica separado das suas despesas pessoais.</div>
 <button class="btn full">Salvar configuração</button>
 </form></div></div>
-<div id="modal" class="modal"><div class="box"><div class="top"><h2 id="mt" style="margin:0;font-size:18px">Novo lançamento</h2><button class="btn white" onclick="closeModal()">Fechar</button></div><form class="form" onsubmit="save(event)">
-<label>Tipo<select id="tipo"><option>DESPESA</option><option>RECEITA</option></select></label><label>Vencimento<input id="data" type="date" required></label>
+<div id="membroModal" class="modal"><div class="box">
+<div class="top"><h2 style="margin:0;font-size:18px">Novo membro</h2><button class="btn white" onclick="closeMembro()">Fechar</button></div>
+<form class="form" onsubmit="saveMembro(event)">
+<label class="full">Nome do membro<input id="nomeMembro" required placeholder="Ex.: João"></label>
+<label>Valor mensal<input id="valorMembro" type="number" step="0.01" required></label>
+<label>Dia de vencimento<input id="diaMembro" type="number" min="1" max="31" value="10" required></label>
+<button class="btn full">Salvar membro</button>
+</form></div></div>
+<div id="lmModal" class="modal"><div class="box">
+<div class="top"><h2 style="margin:0;font-size:18px">Lançamento do membro</h2><button class="btn white" onclick="closeLancMembro()">Fechar</button></div>
+<form class="form" onsubmit="saveLancMembro(event)">
+<label>Membro<select id="lmMembro" required></select></label>
+<label>Data<input id="lmData" type="date" required></label>
+<label>Descrição<input id="lmDesc" placeholder="Ex.: ajuda obra" required></label>
+<label>Valor<input id="lmValor" type="number" step="0.01" required></label>
+<label class="full">Data de pagamento<input id="lmPgto" type="date"></label>
+<button class="btn full">Salvar lançamento</button>
+</form></div></div>
+<div id="modal" class="modal"><div class="box">
+<div class="top"><h2 id="mt" style="margin:0;font-size:18px">Novo lançamento</h2><button class="btn white" onclick="closeModal()">Fechar</button></div>
+<form class="form" onsubmit="save(event)">
+<label>Tipo<select id="tipo"><option>DESPESA</option><option>RECEITA</option></select></label>
+<label>Data de vencimento<input id="data" type="date" required></label>
 <label>Categoria<select id="cat"><option>CASA</option><option>MORADIA</option><option>MERCADO</option><option>SAÚDE</option><option>EDUCAÇÃO</option><option>RELIGIÃO</option><option>LAZER</option><option>C. DE CRÉDITO</option><option>OUTROS</option><option>SALÁRIO</option><option>BENEFÍCIO</option><option>COMISSÃO</option><option>BICO</option><option>EXTRA</option></select></label>
-<label>Valor<input id="valor" type="number" step="0.01" required></label><label class="full">Descrição<input id="desc" placeholder="Ex.: Claro, aluguel..." required></label><label class="full"><input id="pago" type="checkbox" style="width:auto;display:inline"> Já foi pago</label><button class="btn full">Salvar</button></form></div></div>
+<label>Valor<input id="valor" type="number" step="0.01" required></label>
+<label class="full">Descrição<input id="desc" placeholder="Ex.: Claro, aluguel, compra..." required></label>
+<div id="parcFields" class="full" style="display:none">
+  <div class="form" style="margin-top:0">
+    <label>Quantidade de parcelas<input id="qtdParc" type="number" min="1" max="240" value="6"></label>
+    <label>Primeiro vencimento<input id="primeiroVenc" type="date"></label>
+  </div>
+  <div style="margin-top:9px;padding:10px 12px;background:#eff6ff;border-radius:9px;color:#1e40af;font-size:12px">
+    O app criará automaticamente a lista 1/6, 2/6, 3/6... com vencimento mensal e o mesmo valor informado.
+  </div>
+</div>
+<label class="full">Data de pagamento (opcional)<input id="datapag" type="date"></label>
+<button class="btn full">Salvar</button>
+</form></div></div>
 <script>
 const D={"lancamentos": [{"data": "2026-08-08", "tipo": "DESPESA", "categoria": "CASA", "descricao": "Claro", "valor": -404.88, "pagamento": "2026-09-09"}, {"data": "2026-09-08", "tipo": "DESPESA", "categoria": "CASA", "descricao": "Claro", "valor": -374.86, "pagamento": null}, {"data": "2026-09-07", "tipo": "RECEITA", "categoria": "SALÁRIO", "descricao": "PMESP", "valor": 5359.67, "pagamento": "2026-09-08"}, {"data": "2026-09-10", "tipo": "RECEITA", "categoria": "COMISSÃO", "descricao": "Luana", "valor": 275.0, "pagamento": null}, {"data": "2026-09-05", "tipo": "RECEITA", "categoria": "COMISSÃO", "descricao": "Thiago", "valor": 625.0, "pagamento": "2026-09-06"}, {"data": "2026-09-28", "tipo": "RECEITA", "categoria": "COMISSÃO", "descricao": "Keliton", "valor": 625.0, "pagamento": null}, {"data": "2026-09-03", "tipo": "RECEITA", "categoria": "BENEFÍCIO", "descricao": "Pluxee", "valor": 168.0, "pagamento": "2026-09-03"}, {"data": "2026-09-07", "tipo": "DESPESA", "categoria": "OUTROS", "descricao": "Advogado Kitadani", "valor": -49.45, "pagamento": "2026-09-09"}, {"data": "2026-09-10", "tipo": "DESPESA", "categoria": "CASA", "descricao": "Sabesp", "valor": -87.31, "pagamento": "2026-09-09"}, {"data": "2026-09-10", "tipo": "DESPESA", "categoria": "CASA", "descricao": "TIM (INTERNAÇÃO)", "valor": -182.67, "pagamento": "2026-09-09"}, {"data": "2026-09-10", "tipo": "DESPESA", "categoria": "MORADIA", "descricao": "Aluguel", "valor": -1510.0, "pagamento": null}, {"data": "2026-09-15", "tipo": "DESPESA", "categoria": "CASA", "descricao": "Gás", "valor": -57.8, "pagamento": "2026-09-09"}, {"data": "2026-09-07", "tipo": "DESPESA", "categoria": "EDUCAÇÃO", "descricao": "Perua escolar", "valor": -180.0, "pagamento": "2026-09-10"}, {"data": "2026-09-12", "tipo": "RECEITA", "categoria": "EXTRA", "descricao": "Vaga Tia Mônica", "valor": 100.0, "pagamento": null}, {"data": "2026-05-10", "tipo": "DESPESA", "categoria": "RELIGIÃO", "descricao": "Gabriel", "valor": -75.0, "pagamento": null}, {"data": "2026-06-10", "tipo": "DESPESA", "categoria": "RELIGIÃO", "descricao": "Gabriel", "valor": -75.0, "pagamento": null}, {"data": "2026-07-10", "tipo": "DESPESA", "categoria": "RELIGIÃO", "descricao": "Gabriel", "valor": -75.0, "pagamento": null}, {"data": "2026-08-10", "tipo": "DESPESA", "categoria": "RELIGIÃO", "descricao": "Gabriel", "valor": -75.0, "pagamento": null}, {"data": "2026-09-10", "tipo": "DESPESA", "categoria": "RELIGIÃO", "descricao": "Gabriel", "valor": -75.0, "pagamento": null}, {"data": "2026-10-10", "tipo": "DESPESA", "categoria": "RELIGIÃO", "descricao": "Sabrina", "valor": -100.0, "pagamento": "2026-09-09"}, {"data": "2026-11-10", "tipo": "DESPESA", "categoria": "RELIGIÃO", "descricao": "Sabrina", "valor": -100.0, "pagamento": null}, {"data": "2026-08-15", "tipo": "DESPESA", "categoria": "SAÚDE", "descricao": "Academia", "valor": -229.9, "pagamento": "2026-09-02"}, {"data": "2026-09-15", "tipo": "DESPESA", "categoria": "SAÚDE", "descricao": "Academia", "valor": -229.9, "pagamento": null}], "parcelas": [{"descricao": "Espaço Laser", "parcela": 1, "total": 6, "vencimento": "2026-08-03", "valor": -97.89, "pagamento": null}, {"descricao": "Espaço Laser", "parcela": 2, "total": 6, "vencimento": "2026-09-03", "valor": -97.89, "pagamento": null}, {"descricao": "Espaço Laser", "parcela": 3, "total": 6, "vencimento": "2026-10-03", "valor": -97.89, "pagamento": null}, {"descricao": "Espaço Laser", "parcela": 4, "total": 6, "vencimento": "2026-11-03", "valor": -97.89, "pagamento": null}, {"descricao": "Espaço Laser", "parcela": 5, "total": 6, "vencimento": "2026-12-03", "valor": -97.89, "pagamento": null}, {"descricao": "Espaço Laser", "parcela": 6, "total": 6, "vencimento": "2027-01-03", "valor": -97.89, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 1, "total": 17, "vencimento": "2026-08-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 2, "total": 17, "vencimento": "2026-09-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 3, "total": 17, "vencimento": "2026-10-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 4, "total": 17, "vencimento": "2026-11-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 5, "total": 17, "vencimento": "2026-12-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 6, "total": 17, "vencimento": "2027-01-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 7, "total": 17, "vencimento": "2027-02-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 8, "total": 17, "vencimento": "2027-03-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 9, "total": 17, "vencimento": "2027-04-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 10, "total": 17, "vencimento": "2027-05-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 11, "total": 17, "vencimento": "2027-06-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 12, "total": 17, "vencimento": "2027-07-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 13, "total": 17, "vencimento": "2027-08-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 14, "total": 17, "vencimento": "2027-09-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 15, "total": 17, "vencimento": "2027-10-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 16, "total": 17, "vencimento": "2027-11-28", "valor": -332.35, "pagamento": null}, {"descricao": "SYGLYD Sampaio Advog", "parcela": 17, "total": 17, "vencimento": "2027-12-28", "valor": -332.35, "pagamento": null}, {"descricao": "Palestra Gratuita", "parcela": 1, "total": 3, "vencimento": "2026-08-02", "valor": -266.11, "pagamento": null}, {"descricao": "Palestra Gratuita", "parcela": 2, "total": 3, "vencimento": "2026-09-02", "valor": -266.11, "pagamento": null}, {"descricao": "Palestra Gratuita", "parcela": 3, "total": 3, "vencimento": "2026-10-02", "valor": -266.11, "pagamento": null}]};let L=D.lancamentos||[],P=D.parcelas||[],pm=false;
-const M=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}), F=d=>d?d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4):'—';
+const M=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}), F=d=>d?d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4):'—'; function FM(d){return d?d.slice(8,10)+'/'+d.slice(5,7):'—'}
 function S(x){if(x.pagamento)return'PAGO';let d=new Date((x.data||x.vencimento)+'T12:00:00');return d<new Date('2026-09-17T12:00:00')?'ATRASADO':'EM DIA'}
 function C(s){return s==='PAGO'?'green':s==='ATRASADO'?'red':'amber'}
-function go(id,b){document.querySelectorAll('.page').forEach(x=>x.style.display='none');document.getElementById(id).style.display='block';document.getElementById('title').textContent={dashboard:'Dashboard',lancamentos:'Lançamentos',parcelamentos:'Parcelamentos',pagamentos:'Pagamentos',mensalidades:'Mensalidades',relatorios:'Relatórios'}[id];render()}
+function go(id,b){document.querySelectorAll('.page').forEach(x=>x.style.display='none');document.getElementById(id).style.display='block';const isT=id==='terreiro';document.getElementById('navPessoal').style.display=isT?'none':'block';document.getElementById('navTerreiro').style.display=isT?'block':'none';document.getElementById('mobilePessoal').style.display=isT?'none':'flex';document.getElementById('mobileTerreiro').style.display=isT?'flex':'none';document.getElementById('title').textContent={dashboard:'Dashboard',lancamentos:'Lançamentos',parcelamentos:'Parcelamentos',pagamentos:'Pagamentos',terreiro:'Controle do Terreiro',relatorios:'Relatórios'}[id];render()}
 
 let mensalidade = JSON.parse(localStorage.getItem('controle_mensalidade') || 'null') || {
   valor: 0, dia: 10, descricao: 'Mensalidade', ultimoPagamento: null
@@ -101,15 +151,113 @@ function marcarMensalidade(){
   mensalidade.ultimoPagamento='2026-09-17';
   saveMensState();renderMensalidade();
 }
+
+let membros = JSON.parse(localStorage.getItem('controle_membros') || '[]');
+let lancMembros = JSON.parse(localStorage.getItem('controle_lanc_membros') || '[]');
+function saveMembros(){localStorage.setItem('controle_membros',JSON.stringify(membros));localStorage.setItem('controle_lanc_membros',JSON.stringify(lancMembros))}
+function mesAtualRef(){return '2026-09'}
+function statusMembro(m,mes){
+  const now=new Date('2026-09-17T12:00:00');
+  let [y,mm]=mes.split('-').map(Number);
+  let day=Math.min(Number(m.dia)||1,new Date(y,mm,0).getDate());
+  let venc=new Date(y,mm-1,day,12);
+  let pg=m.pagamentos?.[mes]||null;
+  if(pg)return 'PAGO';
+  return venc<now?'ATRASADO':'EM DIA';
+}
+function ensureMemberPaymentMap(m){if(!m.pagamentos)m.pagamentos={}}
+function populateMemberMonth(){
+  const s=document.getElementById('mesMembros'); if(!s)return;
+  const current=s.value||mesAtualRef();
+  let meses=new Set([mesAtualRef()]);
+  membros.forEach(m=>Object.keys(m.pagamentos||{}).forEach(x=>meses.add(x)));
+  lancMembros.forEach(x=>meses.add((x.data||'').slice(0,7)));
+  let arr=[...meses].filter(Boolean).sort();
+  s.innerHTML=arr.map(m=>'<option value="'+m+'">'+new Date(m+'-01T12:00:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'})+'</option>').join('');
+  if(arr.includes(current))s.value=current;
+}
+function renderMembros(){
+  populateMemberMonth();
+  const mes=document.getElementById('mesMembros')?.value||mesAtualRef();
+  let counts={dia:0,atrasado:0,pago:0};
+  membros.forEach(m=>{let s=statusMembro(m,mes);if(s==='PAGO')counts.pago++;else if(s==='ATRASADO')counts.atrasado++;else counts.dia++});
+  document.getElementById('mEmDia').textContent=counts.dia+' membro'+(counts.dia===1?'':'s');
+  document.getElementById('mAtrasado').textContent=counts.atrasado+' membro'+(counts.atrasado===1?'':'s');
+  document.getElementById('mPago').textContent=counts.pago+' membro'+(counts.pago===1?'':'s');
+  document.getElementById('tmembros').innerHTML=membros.map((m,i)=>{
+    ensureMemberPaymentMap(m); let s=statusMembro(m,mes), [y,mm]=mes.split('-').map(Number), day=Math.min(Number(m.dia)||1,new Date(y,mm,0).getDate());
+    let venc=y+'-'+String(mm).padStart(2,'0')+'-'+String(day).padStart(2,'0'),pg=m.pagamentos[mes]||'';
+    return '<tr><td><b>'+m.nome+'</b></td><td>'+M(m.valor)+'</td><td>'+FM(venc)+'</td><td><input type="date" value="'+pg+'" onchange="setPgtoMembro('+i+',this.value)" style="border:1px solid var(--line);border-radius:8px;padding:7px;max-width:120px"></td><td><span class="pill '+C(s)+'">'+s+'</span></td><td><button class="btn white" style="padding:7px 9px" onclick="verDadosMembro('+i+')">Ver dados</button></td></tr>';
+  }).join('')||'<tr><td colspan="6" style="padding:25px;text-align:center;color:#697386">Nenhum membro cadastrado.</td></tr>';
+}
+function setPgtoMembro(i,data){
+  const mes=document.getElementById('mesMembros').value||mesAtualRef();
+  ensureMemberPaymentMap(membros[i]); membros[i].pagamentos[mes]=data||null; saveMembros(); renderMembros();
+}
+function openMembro(){document.getElementById('membroModal').classList.add('show')}
+function closeMembro(){document.getElementById('membroModal').classList.remove('show')}
+function saveMembro(e){e.preventDefault();membros.push({nome:document.getElementById('nomeMembro').value.trim(),valor:Number(document.getElementById('valorMembro').value),dia:Number(document.getElementById('diaMembro').value),pagamentos:{}});saveMembros();closeMembro();renderMembros()}
+function openLancMembro(){
+  const s=document.getElementById('lmMembro'); s.innerHTML=membros.map((m,i)=>'<option value="'+i+'">'+m.nome+'</option>').join('');
+  if(!membros.length){alert('Cadastre um membro primeiro.');return}
+  document.getElementById('lmData').value='2026-09-17';document.getElementById('lmPgto').value='';document.getElementById('lmModal').classList.add('show')
+}
+function closeLancMembro(){document.getElementById('lmModal').classList.remove('show')}
+function saveLancMembro(e){e.preventDefault();const i=Number(document.getElementById('lmMembro').value);lancMembros.push({membroId:i,data:document.getElementById('lmData').value,descricao:document.getElementById('lmDesc').value.trim(),valor:Number(document.getElementById('lmValor').value),pagamento:document.getElementById('lmPgto').value||null});saveMembros();closeLancMembro();alert('Lançamento registrado nos dados de '+membros[i].nome+'.')}
+function verDadosMembro(i){
+  const m=membros[i], mensal=Object.entries(m.pagamentos||{}).map(([mes,pg])=>mes+' — '+(pg?'PAGO em '+F(pg):'pendente')).join('\\n')||'Nenhuma mensalidade registrada';
+  const extras=lancMembros.filter(x=>x.membroId===i).map(x=>F(x.data)+' — '+x.descricao+' — '+M(x.valor)+(x.pagamento?' — pago em '+F(x.pagamento):'')).join('\\n')||'Nenhum outro lançamento';
+  alert('DADOS DE '+m.nome.toUpperCase()+'\\n\\nMENSALIDADES:\\n'+mensal+'\\n\\nOUTROS LANÇAMENTOS:\\n'+extras);
+}
 function render(){let r=L.filter(x=>x.tipo==='RECEITA').reduce((a,x)=>a+x.valor,0),d=L.filter(x=>x.tipo==='DESPESA').reduce((a,x)=>a+Math.abs(x.valor),0);document.getElementById('rec').textContent=M(r);document.getElementById('des').textContent=M(d);document.getElementById('sal').textContent=M(r-d);document.getElementById('abe').textContent=M(L.filter(x=>!x.pagamento&&x.tipo==='DESPESA').reduce((a,x)=>a+Math.abs(x.valor),0)+P.filter(x=>!x.pagamento).reduce((a,x)=>a+Math.abs(x.valor),0));
 document.getElementById('recentes').innerHTML=L.slice(0,7).map(x=>'<div class="row"><span><b>'+x.descricao+'</b><br><small>'+x.categoria+' • '+F(x.data)+'</small></span><b class="'+(x.tipo==='RECEITA'?'green':'red')+'">'+M(x.valor)+'</b></div>').join('');
 let c={};L.filter(x=>x.tipo==='DESPESA').forEach(x=>c[x.categoria]=(c[x.categoria]||0)+Math.abs(x.valor));let a=Object.entries(c).sort((x,y)=>y[1]-x[1]).slice(0,7),mx=a[0]?.[1]||1;document.getElementById('cats').innerHTML=a.map(x=>'<div style="margin:10px 0"><div class="row" style="padding:0;border:0"><span>'+x[0]+'</span><b>'+M(x[1])+'</b></div><div style="height:8px;background:#eef1f5;border-radius:9px"><div style="height:8px;width:'+(x[1]/mx*100)+'%;background:#2563eb;border-radius:9px"></div></div></div>').join('');
-let q=[...L.filter(x=>!x.pagamento).map(x=>({...x,vencimento:x.data})),...P.filter(x=>!x.pagamento)].sort((a,b)=>new Date(a.vencimento)-new Date(b.vencimento)).slice(0,6);document.getElementById('prox').innerHTML=q.map(x=>'<div class="row"><span><b>'+x.descricao+'</b><br><small>'+F(x.vencimento)+'</small></span><b>'+M(Math.abs(x.valor))+'</b></div>').join('')||'<div style="padding:20px;color:#697386">Nenhum pagamento pendente.</div>';renderLanc();renderP();renderPag();renderRel();renderMensalidade()}
-function renderLanc(){let q=(document.getElementById('busca')?.value||'').toLowerCase(),t=document.getElementById('ft')?.value||'';let a=L.filter(x=>(!q||x.descricao.toLowerCase().includes(q))&&(!t||x.tipo===t));document.getElementById('tl').innerHTML=a.map(x=>'<tr><td>'+F(x.data)+'</td><td>'+x.tipo+'</td><td>'+x.categoria+'</td><td>'+x.descricao+'</td><td class="'+(x.tipo==='RECEITA'?'green':'red')+'">'+M(x.valor)+'</td><td><span class="pill '+C(S(x))+'">'+S(x)+'</span></td></tr>').join('')}
-function renderP(){document.getElementById('tp').innerHTML=P.slice(0,120).map((x,i)=>'<tr><td>'+x.descricao+'</td><td>'+x.parcela+'/'+x.total+'</td><td>'+F(x.vencimento)+'</td><td>'+M(Math.abs(x.valor))+'</td><td><span class="pill '+C(S(x))+'">'+S(x)+'</span></td><td>'+(x.pagamento?'': '<button class="btn" style="padding:7px 9px" onclick="payP('+i+')">Pagar</button>')+'</td></tr>').join('')}
+let q=[...L.filter(x=>!x.pagamento).map(x=>({...x,vencimento:x.data})),...P.filter(x=>!x.pagamento)].sort((a,b)=>new Date(a.vencimento)-new Date(b.vencimento)).slice(0,6);document.getElementById('prox').innerHTML=q.map(x=>'<div class="row"><span><b>'+x.descricao+'</b><br><small>'+F(x.vencimento)+'</small></span><b>'+M(Math.abs(x.valor))+'</b></div>').join('')||'<div style="padding:20px;color:#697386">Nenhum pagamento pendente.</div>';renderLanc();renderP();renderPag();renderRel();renderMensalidade();renderMembros()}
+function renderLanc(){
+  let q=(document.getElementById('busca')?.value||'').toLowerCase(),t=document.getElementById('ft')?.value||'';
+  let anos=[...new Set(L.map(x=>(x.data||'').slice(0,4)).filter(Boolean))].sort();
+  const ay=document.getElementById('anosLanc');
+  if(ay){
+    const atual=ay.dataset.ano||'';
+    ay.innerHTML='<button class="btn '+(!atual?'':'white')+'" style="padding:7px 11px" onclick="setAnoLanc('')">Todos</button>'+anos.map(a=>'<button class="btn '+(atual===a?'':'white')+'" style="padding:7px 11px" onclick="setAnoLanc(\''+a+'\')">'+a+'</button>').join('');
+  }
+  let ano=ay?.dataset.ano||'';
+  let a=L.filter(x=>(!ano||(x.data||'').slice(0,4)===ano)&&(!q||x.descricao.toLowerCase().includes(q))&&(!t||x.tipo===t));
+  document.getElementById('tl').innerHTML=a.map(x=>{
+    let i=L.indexOf(x), st=S(x), tipo=x.tipo==='RECEITA'?'R':'D';
+    return '<tr><td>'+FM(x.data)+'</td><td><b style="color:'+(x.tipo==='RECEITA'?'#16a34a':'#dc2626')+'">'+tipo+'</b></td><td>'+x.categoria+'</td><td>'+x.descricao+'</td><td class="'+(x.tipo==='RECEITA'?'green':'red')+'">'+M(x.valor)+'</td><td><input type="date" value="'+(x.pagamento||'')+'" onchange="setPagamento('+i+',this.value)" style="border:1px solid var(--line);border-radius:8px;padding:7px;max-width:120px"></td><td><span class="pill '+C(st)+'">'+st+'</span></td><td><button class="btn white" style="padding:7px 9px" onclick="repetirLancamento('+i+')">Repetir</button>'+(x.pagamento?'':' <button class="btn" style="padding:7px 9px" onclick="payL('+i+')">Pagar</button>')+'</td></tr>';
+  }).join('');
+}
+function setPagamento(i,data){
+  L[i].pagamento=data||null;
+  render();
+}
+function setAnoLanc(ano){const el=document.getElementById('anosLanc');if(el)el.dataset.ano=ano;renderLanc()}\nfunction renderP(){
+  const sel=document.getElementById('filtroMes');
+  const meses=[...new Set(P.map(x=>(x.vencimento||'').slice(0,7)).filter(Boolean))].sort();
+  if(sel){
+    const atual=sel.value||'TODOS';
+    sel.innerHTML='<option value="TODOS">Todos os meses</option>'+meses.map(m=>'<option value="'+m+'">'+new Date(m+'-01T12:00:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'})+'</option>').join('');
+    if(meses.includes(atual))sel.value=atual;else sel.value='TODOS';
+  }
+  let arr=P.filter(x=>!sel||sel.value==='TODOS'||(x.vencimento||'').slice(0,7)===sel.value);
+  const ordem=document.getElementById('ordemParc')?.value||'MES';
+  arr.sort((a,b)=>{
+    const sa=S(a), sb=S(b);
+    if(ordem==='ATRASADOS'){
+      if(sa==='ATRASADO'&&sb!=='ATRASADO')return -1;
+      if(sb==='ATRASADO'&&sa!=='ATRASADO')return 1;
+    }
+    return new Date(a.vencimento)-new Date(b.vencimento) || (a.parcela||0)-(b.parcela||0);
+  });
+  document.getElementById('tp').innerHTML=arr.slice(0,240).map((x)=>{
+    const i=P.indexOf(x);
+    return '<tr><td>'+x.descricao+'</td><td>'+x.parcela+'</td><td>'+x.total+'</td><td>'+((x.texto)||x.descricao+' '+x.parcela+'/'+x.total)+'</td><td>'+F(x.vencimento)+'</td><td>'+M(Math.abs(x.valor))+'</td><td>'+F(x.pagamento)+'</td><td><span class="pill '+C(S(x))+'">'+S(x)+'</span></td><td>'+(x.pagamento?'':'<button class="btn" style="padding:7px 9px" onclick="payP('+i+')">Pagar</button>')+'</td></tr>';
+  }).join('');
+}
 function renderPag(){let a=[...L.map((x,i)=>({...x,k:'l',i,vencimento:x.data})),...P.map((x,i)=>({...x,k:'p',i}))].sort((a,b)=>new Date(a.vencimento)-new Date(b.vencimento)).slice(0,50);document.getElementById('pag').innerHTML=a.map(x=>'<div class="row"><span><b>'+x.descricao+'</b><br><small>'+F(x.vencimento)+'</small></span><b>'+M(Math.abs(x.valor))+'</b><span class="pill '+C(S(x))+'">'+S(x)+'</span>'+(x.pagamento?'':'<button class="btn" style="padding:7px 9px" onclick="'+(x.k==='p'?'payP('+x.i+')':'payL('+x.i+')')+'">Pagar</button>')+'</div>').join('')}
 function renderRel(){let ms=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];document.getElementById('rel').innerHTML=ms.map((m,i)=>{let r=L.filter(x=>x.tipo==='RECEITA'&&new Date(x.data).getMonth()===i).reduce((a,x)=>a+x.valor,0),d=L.filter(x=>x.tipo==='DESPESA'&&new Date(x.data).getMonth()===i).reduce((a,x)=>a+Math.abs(x.valor),0);return'<div class="row"><span>'+m+'/2026</span><b>'+M(r-d)+'</b></div>'}).join('')}
-function openModal(p=false){pm=p;document.getElementById('mt').textContent=p?'Novo parcelamento':'Novo lançamento';document.getElementById('modal').classList.add('show')}function closeModal(){document.getElementById('modal').classList.remove('show')}
-function save(e){e.preventDefault();let tipo=document.getElementById('tipo').value,data=document.getElementById('data').value,cat=document.getElementById('cat').value,v=+document.getElementById('valor').value,desc=document.getElementById('desc').value,pago=document.getElementById('pago').checked;if(pm){let n=+prompt('Quantidade de parcelas?','6');if(!n)return;for(let i=0;i<n;i++){let d=new Date(data+'T12:00:00');d.setMonth(d.getMonth()+i);P.unshift({descricao:desc,parcela:i+1,total:n,vencimento:d.toISOString().slice(0,10),valor:-Math.abs(v),pagamento:pago?d.toISOString().slice(0,10):null})}}else L.unshift({data,tipo,categoria:cat,descricao:desc,valor:tipo==='DESPESA'?-Math.abs(v):Math.abs(v),pagamento:pago?data:null});closeModal();render()}
-function payL(i){L[i].pagamento='2026-09-17';render()}function payP(i){P[i].pagamento='2026-09-17';render()}render();
+function openModal(p=false){pm=p;document.getElementById('mt').textContent=p?'Novo parcelamento':'Novo lançamento';document.getElementById('data').value='2026-09-17';document.getElementById('datapag').value='';document.getElementById('parcFields').style.display=p?'block':'none';document.getElementById('primeiroVenc').value='2026-09-17';document.getElementById('qtdParc').value='6';document.getElementById('modal').classList.add('show')}function closeModal(){document.getElementById('modal').classList.remove('show')}
+function save(e){e.preventDefault();let tipo=document.getElementById('tipo').value,data=document.getElementById('data').value,cat=document.getElementById('cat').value,v=+document.getElementById('valor').value,desc=document.getElementById('desc').value,datapag=document.getElementById('datapag').value||null;if(pm){let n=Math.max(1,Number(document.getElementById('qtdParc').value||1));let first=document.getElementById('primeiroVenc').value||data;for(let i=0;i<n;i++){let d=new Date(first+'T12:00:00');d.setMonth(d.getMonth()+i);let ds=d.toISOString().slice(0,10);P.push({descricao:desc,parcela:i+1,total:n,texto:desc+' '+(i+1)+'/'+n,vencimento:ds,valor:-Math.abs(v),pagamento:i===0?datapag:null})}P.sort((a,b)=>new Date(a.vencimento)-new Date(b.vencimento));}else L.unshift({data,tipo,categoria:cat,descricao:desc,valor:tipo==='DESPESA'?-Math.abs(v):Math.abs(v),pagamento:datapag});closeModal();render()}
+function payL(i){L[i].pagamento=new Date().toISOString().slice(0,10);render()}function payP(i){P[i].pagamento='2026-09-17';render()}render();
 </script></body></html>

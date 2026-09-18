@@ -1,16 +1,8 @@
-CONTROLE+ — versão atualizada para publicação
-Arquivo principal: index.html
+CONTROLE+ — ATUALIZAÇÃO CONTROLE DO TERREIRO
 
-Recursos incluídos:
-- Dashboard financeiro pessoal
-- Lançamentos
-- Parcelamentos
-- Pagamentos
-- Relatórios
-- Módulo separado de Mensalidades
-- Mensalidade com valor, dia de vencimento e status PAGA/EM DIA/ATRASADA
-- Sem login
-- Configuração da mensalidade salva no aparelho
+A tela inicial continua sendo o Controle Pessoal.
+O Controle do Terreiro agora fica em uma área separada do menu.
 
-Para publicar no GitHub, envie o arquivo index.html para a raiz do repositório.
-Depois, conecte o repositório ao Netlify.
+Regra: nenhum lançamento do Controle do Terreiro entra no saldo, receitas, despesas, pagamentos ou relatórios do Controle Pessoal.
+
+Atualização: substitua o index.html do GitHub por este arquivo e faça o commit na branch main. O Netlify fará o deploy automaticamente.
