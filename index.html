@@ -137,27 +137,46 @@ const seed={
  membros:[], lancMembros:[], categorias:['CASA','MORADIA','MERCADO','SAÚDE','EDUCAÇÃO','RELIGIÃO','LAZER','C. DE CRÉDITO','OUTROS','SALÁRIO','BENEFÍCIO','COMISSÃO','BICO','EXTRA']
 };
 let data=load(), state={area:'pessoal',page:'dashboard',month:'2026-09',lancStatus:'',lancTipo:'',lancSearch:'',lancYear:'',parcelStatus:'',parcelMonth:'',reportMonth:'2026-09',memberMonth:'2026-09',calendarMonth:'2026-09'};
+function asDate(v,fallback=''){
+ const s=String(v??'').trim();
+ if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+ return fallback;
+}
+function asNumber(v,fallback=0){
+ const n=Number(v);
+ return Number.isFinite(n)?n:fallback;
+}
+function normalizeData(x){
+ const base=structuredClone(seed), raw=(x&&typeof x==='object')?x:{};
+ const lancRaw=Array.isArray(raw.lancamentos)?raw.lancamentos:base.lancamentos;
+ const parcRaw=Array.isArray(raw.parcelas)?raw.parcelas:base.parcelas;
+ const memRaw=Array.isArray(raw.membros)?raw.membros:base.membros;
+ const lmemRaw=Array.isArray(raw.lancMembros)?raw.lancMembros:base.lancMembros;
+ const lanc=lancRaw.filter(Boolean).map((o,i)=>{
+   if(Array.isArray(o)) o={};
+   return {id:String(o.id||('l'+i)),data:asDate(o.data||o.dataVencimento||o.vencimento,''),tipo:o.tipo==='RECEITA'||o.tipo==='R'?'RECEITA':'DESPESA',categoria:String(o.categoria||'OUTROS'),descricao:String(o.descricao||o.descrição||'Sem descrição'),valor:asNumber(o.valor,o.tipo==='RECEITA'?0:0),pagamento:asDate(o.pagamento||o.dataPagamento||o.dataPgto,null)};
+ }).filter(o=>o.data);
+ const parcelas=parcRaw.filter(Boolean).map((o,i)=>{
+   if(Array.isArray(o)) return null;
+   return {id:String(o.id||('p'+i)),descricao:String(o.descricao||'Sem descrição'),parcela:asNumber(o.parcela,1),total:asNumber(o.total,1),vencimento:asDate(o.vencimento||o.data||o.dataVencimento,''),valor:asNumber(o.valor,0),pagamento:asDate(o.pagamento||o.dataPagamento||o.dataPgto,null)};
+ }).filter(o=>o&&o.vencimento);
+ const membros=memRaw.filter(Boolean).map((m,i)=>({id:String(m.id||('m'+i)),nome:String(m.nome||'Sem nome'),valor:asNumber(m.valor,0),dia:Math.min(31,Math.max(1,Math.round(asNumber(m.dia,10)))),pagamentos:(m.pagamentos&&typeof m.pagamentos==='object'&&!Array.isArray(m.pagamentos))?m.pagamentos:{}}));
+ const lancMembros=lmemRaw.filter(Boolean).map((o,i)=>({id:String(o.id||('t'+i)),membroId:String(o.membroId||''),data:asDate(o.data||o.dataLancamento||o.vencimento,''),valor:asNumber(o.valor,0),descricao:String(o.descricao||'Sem descrição'),tipo:String(o.tipo||'OUTRO')})).filter(o=>o.data);
+ const categorias=Array.isArray(raw.categorias)&&raw.categorias.length?raw.categorias.map(String).filter(Boolean):base.categorias;
+ return {...base,...raw,lancamentos:lanc.length?lanc:base.lancamentos,parcelas:parcelas.length?parcelas:base.parcelas,membros,lancMembros,categorias};
+}
 function load(){
  try{
-  const raw=localStorage.getItem(KEY); if(!raw) return structuredClone(seed);
-  const x=JSON.parse(raw);
-  const base=structuredClone(seed);
-  return {
-   ...base,
-   ...x,
-   lancamentos:Array.isArray(x.lancamentos)?x.lancamentos:base.lancamentos,
-   parcelas:Array.isArray(x.parcelas)?x.parcelas:base.parcelas,
-   membros:Array.isArray(x.membros)?x.membros:base.membros,
-   lancMembros:Array.isArray(x.lancMembros)?x.lancMembros:base.lancMembros,
-   categorias:Array.isArray(x.categorias)&&x.categorias.length?x.categorias:base.categorias
-  };
+  const raw=localStorage.getItem(KEY);
+  if(!raw) return structuredClone(seed);
+  return normalizeData(JSON.parse(raw));
  }catch(e){return structuredClone(seed)}
 }
 function persist(){localStorage.setItem(KEY,JSON.stringify(data))}
 function money(n){return Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
 function fmt(d){if(!d)return '—';const [y,m,day]=d.split('-');return `${day}/${m}/${y}`}
 function today(){return new Date().toISOString().slice(0,10)}
-function status(x){if(x.pagamento)return'PAGO';const d=x.data||x.vencimento;return d<today()?'ATRASADO':'EM DIA'}
+function status(x){x=x||{};if(x.pagamento)return'PAGO';const d=asDate(x.data||x.vencimento,'9999-12-31');return d<today()?'ATRASADO':'EM DIA'}
 function pill(s){return `<span class="pill ${s==='PAGO'?'green':s==='ATRASADO'?'red':''}">${s}</span>`}
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1800)}
 function setPage(p){state.page=p;renderShell();renderPage()}
@@ -178,7 +197,7 @@ function renderShell(){
  const mobile=document.getElementById('mobileNav');let items=state.area==='pessoal'?navItems().slice(0,5):navItems().slice(0,5);
  mobile.innerHTML=items.map(([p,i,n])=>`<button class="${state.page===p?'active':''}" onclick="setPage('${p}')"><span class="mi">${i}</span>${n}</button>`).join('')+`<button onclick="switchArea('${state.area==='pessoal'?'terreiro':'pessoal'}')"><span class="mi">${state.area==='pessoal'?'⛩':'$'}</span>${state.area==='pessoal'?'Terreiro':'Pessoal'}</button>`;
  document.getElementById('headerAction').style.display=state.page==='dashboard'||state.page==='lancamentos'||state.page==='parcelamentos'||state.page==='lancmembros'?'block':'none';
- document.getElementById('headerAction').textContent=state.area==='terreiro'?'＋ Novo lançamento':'＋ Novo lançamento';
+ if(state.area==='terreiro'){ document.getElementById('headerAction').textContent=state.page==='lancmembros'?'＋ Novo lançamento':'＋ Novo membro'; document.getElementById('headerAction').onclick=state.page==='lancmembros'?openMemberTxnModal:openMemberModal; } else if(state.page==='parcelamentos'){ document.getElementById('headerAction').textContent='＋ Novo parcelamento'; document.getElementById('headerAction').onclick=openParcelModal; } else { document.getElementById('headerAction').textContent='＋ Novo lançamento'; document.getElementById('headerAction').onclick=quickNew; }
 }
 function renderPage(){
  const pages=document.getElementById('pages');pages.innerHTML='';
@@ -187,32 +206,26 @@ function renderPage(){
  bindDateEvents();
 }
 function renderPersonalPages(p){
- try{
-  const views={dashboard:dashboardPersonal,lancamentos:lancamentosPage,parcelamentos:parcelamentosPage,relatorios:relatoriosPage,calendario:calendarioPage,config:configPage};
-  const fn=views[state.page]||dashboardPersonal;
-  p.innerHTML=fn();
- }catch(err){
-  console.error('Controle+ render:',err);
-  if(state.page==='lancamentos') p.innerHTML=lancamentosPageSafe(); else p.innerHTML=`<section class="page active"><div class="section"><b>Não foi possível carregar esta tela.</b><br><small>Seus dados continuam salvos. Recarregue a página para tentar novamente.</small></div></section>`;
- }
+ const views={dashboard:dashboardPersonal,lancamentos:lancamentosPage,parcelamentos:parcelamentosPage,relatorios:relatoriosPage,calendario:calendarioPage,config:configPage};
+ const fn=views[state.page]||dashboardPersonal;
+ try{ p.innerHTML=fn(); }
+ catch(err){ console.error('Controle+ render:',err); p.innerHTML=renderErrorCard('Esta tela'); }
 }
 function renderTerreiroPages(p){
- try{
-  const views={dashboard:dashboardTerreiro,membros:membrosPage,mensalidades:mensalidadesPage,lancmembros:lancMembrosPage,historico:historicoPage,config:configPage};
-  const fn=views[state.page]||dashboardTerreiro;
-  p.innerHTML=fn();
- }catch(err){
-  console.error('Controle+ terreiro render:',err);
-  p.innerHTML=`<section class="page active"><div class="section"><b>Não foi possível carregar esta tela.</b></div></section>`;
- }
+ const views={dashboard:dashboardTerreiro,membros:membrosPage,mensalidades:mensalidadesPage,lancmembros:lancMembrosPage,historico:historicoPage,config:configPage};
+ const fn=views[state.page]||dashboardTerreiro;
+ try{ p.innerHTML=fn(); }
+ catch(err){ console.error('Controle+ terreiro render:',err); p.innerHTML=renderErrorCard('Controle do Terreiro'); }
 }
+function renderErrorCard(name){return `<section class="page active" id="page-${state.page}"><div class="section"><div class="empty" style="padding:28px"><b style="display:block;font-size:18px;margin-bottom:7px">Não foi possível carregar ${name}.</b><span>Os dados continuam salvos. Tente novamente.</span><div style="margin-top:16px"><button class="btn" onclick="renderPage()">Tentar novamente</button></div></div></div></section>`}
+
 function dashboardPersonal(){
- const m='2026-09', arr=data.lancamentos.filter(x=>x.data.startsWith(m)), rec=arr.filter(x=>x.tipo==='RECEITA').reduce((a,x)=>a+x.valor,0),des=arr.filter(x=>x.tipo==='DESPESA').reduce((a,x)=>a+Math.abs(x.valor),0);
+ const m='2026-09', arr=(Array.isArray(data.lancamentos)?data.lancamentos:[]).filter(x=>String(x?.data||'').startsWith(m)), rec=arr.filter(x=>x.tipo==='RECEITA').reduce((a,x)=>a+x.valor,0),des=arr.filter(x=>x.tipo==='DESPESA').reduce((a,x)=>a+Math.abs(x.valor),0);
  const aberto=arr.filter(x=>!x.pagamento&&x.tipo==='DESPESA').reduce((a,x)=>a+Math.abs(x.valor),0)+data.parcelas.filter(x=>!x.pagamento&&x.vencimento.startsWith(m)).reduce((a,x)=>a+Math.abs(x.valor),0);
  const saldo=rec-des;
  const recent=[...arr].sort((a,b)=>b.data.localeCompare(a.data)).slice(0,6);
  const cat={};arr.filter(x=>x.tipo==='DESPESA').forEach(x=>cat[x.categoria]=(cat[x.categoria]||0)+Math.abs(x.valor));const cats=Object.entries(cat).sort((a,b)=>b[1]-a[1]).slice(0,6),mx=cats[0]?.[1]||1;
- const prox=[...data.lancamentos.filter(x=>!x.pagamento),...data.parcelas.filter(x=>!x.pagamento)].sort((a,b)=>(a.data||a.vencimento).localeCompare(b.data||b.vencimento)).slice(0,5);
+ const prox=[...(Array.isArray(data.lancamentos)?data.lancamentos:[]).filter(x=>x&&!x.pagamento),...(Array.isArray(data.parcelas)?data.parcelas:[]).filter(x=>x&&!x.pagamento)].sort((a,b)=>(a.data||a.vencimento).localeCompare(b.data||b.vencimento)).slice(0,5);
  return `<section class="page" id="page-dashboard">
  <div class="cards">
   <div class="card primary"><div class="kicker"><span class="label">Saldo do mês</span><span class="mini">SET/26</span></div><div class="money">${money(saldo)}</div></div>
@@ -270,8 +283,35 @@ function lancamentosPageSafe(){
  const list=Array.isArray(data.lancamentos)?data.lancamentos.filter(Boolean):[];
  return `<section class="page active" id="page-lancamentos"><div class="section"><div class="section-head"><div><h2>Lançamentos</h2><small style="color:var(--muted)">${list.length} registros</small></div><button class="btn" onclick="quickNew()">＋ Novo</button></div><div class="launch-list">${list.map(x=>`<article class="launch-compact"><div class="launch-top"><div class="launch-title"><span class="badge-type ${x.tipo==='RECEITA'?'r':'d'}">${x.tipo==='RECEITA'?'R':'D'}</span><div class="launch-name"><b>${esc(x.descricao||'Sem descrição')}</b><small>${esc(x.categoria||'Sem categoria')}</small></div></div><b class="launch-value ${x.tipo==='RECEITA'?'green':'red'}">${money(x.valor)}</b></div><div class="launch-meta"><span>Venc. ${fmt(x.data)}</span><span>${pill(status(x))}</span></div><div class="launch-bottom"><div><small>Pagamento</small>${dateControl('l',x.id,x.pagamento)}</div><button class="icon-btn" onclick="repeatLaunch('${x.id}')">＋</button></div></article>`).join('')||empty('Nenhum lançamento cadastrado.')}</div></div></section>`;
 }
+function parcelamentosPage(){
+ const list=(Array.isArray(data.parcelas)?data.parcelas:[]).filter(x=>x&&typeof x==='object'&&x.vencimento);
+ const months=[...new Set(list.map(x=>String(x.vencimento).slice(0,7)).filter(x=>/^\d{4}-\d{2}$/.test(x)))].sort((a,b)=>b.localeCompare(a));
+ const month=state.parcelMonth||'';
+ const filtered=list.filter(x=>(!month||String(x.vencimento).startsWith(month))&&(!state.parcelStatus||status(x)===state.parcelStatus)).sort((a,b)=>String(a.vencimento).localeCompare(String(b.vencimento)));
+ const groups={}; filtered.forEach(x=>{const k=String(x.descricao||'Sem descrição');if(!groups[k])groups[k]=[];groups[k].push(x)});
+ return `<section class="page" id="page-parcelamentos"><div class="section">
+ <div class="section-head"><div><h2>Parcelamentos</h2><small style="color:var(--muted)">${filtered.length} parcelas encontradas</small></div><button class="btn" onclick="openParcelModal()">＋ Novo parcelamento</button></div>
+ <div class="toolbar"><select class="select" onchange="state.parcelMonth=this.value;renderPage()"><option value="">Todos os meses</option>${months.map(m=>`<option value="${m}" ${month===m?'selected':''}>${monthLabel(m)}</option>`).join('')}</select></div>
+ <div class="toolbar"><div class="filter-group">${[['','Todos'],['PAGO','Pago'],['EM DIA','Em dia'],['ATRASADO','Atrasado']].map(([v,n])=>`<button class="filter ${state.parcelStatus===v?'active':''}" onclick="state.parcelStatus='${v}';renderPage()">${n}</button>`).join('')}</div></div>
+ ${Object.entries(groups).map(([desc,items])=>`<div class="section" style="margin:12px 0 0;box-shadow:none;background:var(--surface2)"><div class="section-head"><div><h3>${esc(desc)}</h3><small style="color:var(--muted)">${items[0].total||items.length} parcelas · ${money(Math.abs(Number(items[0].valor||0)))} cada</small></div><b>${items.filter(x=>status(x)==='PAGO').length}/${items.length} pagas</b></div>${items.map(x=>`<div class="row"><div class="row-main"><b>${x.parcela||'—'}/${x.total||items.length}</b><small>Venc. ${fmt(x.vencimento)}</small></div><div class="row-right"><b class="red">${money(Number(x.valor||0))}</b><div>${pill(status(x))}</div></div><div>${x.pagamento?`<small class="green">Pago em ${fmt(x.pagamento)}</small>`:`<button class="btn" style="padding:8px 11px;font-size:11px" onclick="payItem('p','${x.id}')">Pagar</button>`}<div style="margin-top:5px">${dateControl('p',x.id,x.pagamento)}</div></div></div>`).join('')}</div>`).join('')||empty('Nenhum parcelamento encontrado.')}
+ </div></section>`;
+}
+function relatoriosPage(){
+ const m=state.reportMonth, arr=(Array.isArray(data.lancamentos)?data.lancamentos:[]).filter(x=>String(x?.data||'').startsWith(m)), rec=arr.filter(x=>x.tipo==='RECEITA').reduce((a,x)=>a+Number(x.valor||0),0), des=arr.filter(x=>x.tipo==='DESPESA').reduce((a,x)=>a+Math.abs(Number(x.valor||0)),0), parc=data.parcelas.filter(x=>String(x.vencimento).startsWith(m)).reduce((a,x)=>a+Math.abs(Number(x.valor||0)),0);
+ const cats={};arr.filter(x=>x.tipo==='DESPESA').forEach(x=>cats[x.categoria]=(cats[x.categoria]||0)+Math.abs(Number(x.valor||0))); const rows=Object.entries(cats).sort((a,b)=>b[1]-a[1]), mx=rows[0]?.[1]||1;
+ return `<section class="page" id="page-relatorios"><div class="section"><div class="section-head"><div><h2>Relatórios</h2><small style="color:var(--muted)">Análise do ${monthLabel(m)}</small></div><select class="select" onchange="state.reportMonth=this.value;renderPage()">${monthOptions(2025,2028,m)}</select></div><div class="cards"><div class="card"><div class="label">Receitas</div><div class="money green">${money(rec)}</div></div><div class="card"><div class="label">Despesas</div><div class="money red">${money(des)}</div></div><div class="card"><div class="label">Saldo</div><div class="money ${rec-des>=0?'green':'red'}">${money(rec-des)}</div></div><div class="card"><div class="label">Parcelas</div><div class="money amber">${money(parc)}</div></div></div></div>
+ <div class="grid2"><div class="section"><div class="section-head"><h2>Despesas por categoria</h2></div>${rows.map(([k,v])=>`<div style="margin:13px 0"><div class="row" style="padding:0;border:0"><span>${esc(k)}</span><b>${money(v)}</b></div><div class="progress"><i style="width:${v/mx*100}%"></i></div></div>`).join('')||empty()}</div><div class="section"><div class="section-head"><h2>Resumo</h2></div><div class="row"><span>Movimentações</span><b>${arr.length}</b></div><div class="row"><span>Pagas</span><b>${arr.filter(x=>status(x)==='PAGO').length}</b></div><div class="row"><span>Em aberto</span><b>${arr.filter(x=>status(x)!=='PAGO').length}</b></div><div class="row"><span>Parcelas no mês</span><b>${data.parcelas.filter(x=>String(x.vencimento).startsWith(m)).length}</b></div></div></div></section>`;
+}
+function calendarioPage(){
+ const m=state.calendarMonth||'2026-09', [y,mo]=m.split('-').map(Number), first=new Date(y,mo-1,1), days=new Date(y,mo,0).getDate(), start=(first.getDay()+6)%7;
+ let cells=''; for(let i=0;i<start;i++) cells+=`<div></div>`;
+ for(let d=1;d<=days;d++){const ds=`${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`, items=[...data.lancamentos.filter(x=>x.data===ds),...data.parcelas.filter(x=>x.vencimento===ds)], hasR=items.some(x=>x.tipo==='RECEITA'),hasD=items.some(x=>x.tipo!=='RECEITA'); cells+=`<button class="day ${ds===today()?'today':''}" onclick="calendarDay('${ds}')"><span class="daynum">${d}</span><div class="dots">${hasR?'<i class="g"></i>':''}${hasD?'<i class="r"></i>':''}</div></button>`}
+ return `<section class="page" id="page-calendario"><div class="section"><div class="monthbar"><button class="chev" onclick="state.calendarMonth=monthMove(state.calendarMonth,-1);renderPage()">‹</button><strong>${monthLabel(m)}</strong><button class="chev" onclick="state.calendarMonth=monthMove(state.calendarMonth,1);renderPage()">›</button></div><div class="calendar">${['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].map(x=>`<div class="weekday">${x}</div>`).join('')}${cells}</div><div id="calendarDetail"></div></div></section>`;
+}
+function configPage(){return `<section class="page" id="page-config"><div class="section"><div class="section-head"><div><h2>Configurações</h2><small style="color:var(--muted)">Controle+ sem login, com dados salvos neste dispositivo</small></div></div><div class="settings-list"><div class="setting"><span><b>Categorias</b><small>Gerenciar categorias de lançamentos</small></span><button onclick="manageCategories()">Gerenciar →</button></div><div class="setting"><span><b>Backup</b><small>Exporte ou restaure seus dados</small></span><span style="display:flex;gap:7px"><button onclick="exportJSON()">Exportar</button><label style="color:var(--blue);font-weight:800;cursor:pointer">Importar<input type="file" accept="application/json" onchange="restoreJSON(event)" style="display:none"></label></span></div><div class="setting"><span><b>Modo escuro</b><small>Alterar aparência do aplicativo</small></span><button class="toggle" onclick="toggleDark(this)"><i></i></button></div><div class="setting"><span><b>Dados iniciais</b><small>Voltar aos dados de demonstração</small></span><button onclick="resetData()">Restaurar</button></div></div></div></section>`}
+
 function dashboardTerreiro(){
- const m=state.memberMonth,members=data.membros||[], paid=members.filter(x=>memberStatus(x,m)==='PAGO').length, late=members.filter(x=>memberStatus(x,m)==='ATRASADO').length,on=members.filter(x=>memberStatus(x,m)==='EM DIA').length;
+ const m=state.memberMonth,members=(Array.isArray(data.membros)?data.membros:[]).filter(Boolean), paid=members.filter(x=>memberStatus(x,m)==='PAGO').length, late=members.filter(x=>memberStatus(x,m)==='ATRASADO').length,on=members.filter(x=>memberStatus(x,m)==='EM DIA').length;
  const total=members.reduce((a,x)=>a+Number(x.valor||0),0), received=members.filter(x=>memberStatus(x,m)==='PAGO').reduce((a,x)=>a+Number(x.valor||0),0);
  return `<section class="page" id="page-dashboard"><div class="terreiro-banner"><div><div class="eyebrow">GESTÃO INDEPENDENTE</div><h2 style="margin:4px 0;font-size:24px">Controle do Terreiro</h2><div style="color:#aab7ca;font-size:12px">${monthLabel(m)} · ${members.length} membros cadastrados</div></div><button class="btn gold" onclick="openMemberModal()">＋ Novo membro</button></div>
  <div class="cards" style="grid-template-columns:repeat(4,1fr);margin-top:16px"><div class="card"><div class="label">Membros</div><div class="money">${members.length}</div></div><div class="card"><div class="label">Pagos</div><div class="money green">${paid}</div></div><div class="card"><div class="label">Em dia</div><div class="money amber">${on}</div></div><div class="card"><div class="label">Atrasados</div><div class="money red">${late}</div></div></div>
@@ -281,14 +321,14 @@ function dashboardTerreiro(){
 }
 function membrosPage(){
  const m=state.memberMonth;
- return `<section class="page" id="page-membros"><div class="section"><div class="section-head"><div><h2>Membros</h2><small style="color:var(--muted)">Mensalidade e histórico ficam vinculados a cada membro</small></div><button class="btn gold" onclick="openMemberModal()">＋ Novo membro</button></div><div class="toolbar"><select class="select" onchange="state.memberMonth=this.value;renderPage()">${monthOptions(2026,2028,m)}</select><input class="field search" placeholder="Pesquisar membro..." oninput="state.memberSearch=this.value.toLowerCase();renderPage()"></div><div class="member-grid">${(data.membros||[]).filter(x=>!state.memberSearch||x.nome.toLowerCase().includes(state.memberSearch)).map(x=>`<div class="member-card"><div class="topline"><h3>${esc(x.nome)}</h3>${pill(memberStatus(x,m))}</div><p>Mensalidade: <b>${money(x.valor)}</b> · vencimento dia ${x.dia}</p><p>Pago em: ${fmt(memberPayment(x,m))}</p><div style="display:flex;gap:7px;margin-top:12px"><button class="btn" style="padding:8px 10px;font-size:11px" onclick="payMember('${x.id}')">Pagar</button><button class="btn secondary" style="padding:8px 10px;font-size:11px" onclick="memberDetail('${x.id}')">Ver dados</button></div></div>`).join('')||empty('Nenhum membro cadastrado.')}</div></div></section>`;
+ return `<section class="page" id="page-membros"><div class="section"><div class="section-head"><div><h2>Membros</h2><small style="color:var(--muted)">Mensalidade e histórico ficam vinculados a cada membro</small></div><button class="btn gold" onclick="openMemberModal()">＋ Novo membro</button></div><div class="toolbar"><select class="select" onchange="state.memberMonth=this.value;renderPage()">${monthOptions(2026,2028,m)}</select><input class="field search" placeholder="Pesquisar membro..." oninput="state.memberSearch=this.value.toLowerCase();renderPage()"></div><div class="member-grid">${(Array.isArray(data.membros)?data.membros:[]).filter(x=>x&&(!state.memberSearch||String(x.nome||'').toLowerCase().includes(state.memberSearch))).map(x=>`<div class="member-card"><div class="topline"><h3>${esc(x.nome)}</h3>${pill(memberStatus(x,m))}</div><p>Mensalidade: <b>${money(x.valor)}</b> · vencimento dia ${x.dia}</p><p>Pago em: ${fmt(memberPayment(x,m))}</p><div style="display:flex;gap:7px;margin-top:12px"><button class="btn" style="padding:8px 10px;font-size:11px" onclick="payMember('${x.id}')">Pagar</button><button class="btn secondary" style="padding:8px 10px;font-size:11px" onclick="memberDetail('${x.id}')">Ver dados</button></div></div>`).join('')||empty('Nenhum membro cadastrado.')}</div></div></section>`;
 }
 function mensalidadesPage(){return membrosPage().replace('id="page-membros"','id="page-mensalidades"').replace('<h2>Membros</h2>','<h2>Mensalidades</h2>')}
 function lancMembrosPage(){
  return `<section class="page" id="page-lancmembros"><div class="section"><div class="section-head"><div><h2>Lançamentos dos membros</h2><small style="color:var(--muted)">Não entram no Controle Financeiro Pessoal</small></div><button class="btn gold" onclick="openMemberTxnModal()">＋ Novo lançamento</button></div><div class="table-wrap"><table class="table"><thead><tr><th>Data</th><th>Membro</th><th>Descrição</th><th>Valor</th><th>Tipo</th></tr></thead><tbody>${(data.lancMembros||[]).sort((a,b)=>b.data.localeCompare(a.data)).map(x=>`<tr><td>${fmt(x.data)}</td><td>${esc((data.membros.find(m=>m.id===x.membroId)||{}).nome||'—')}</td><td>${esc(x.descricao)}</td><td><b>${money(x.valor)}</b></td><td>${esc(x.tipo||'OUTRO')}</td></tr>`).join('')||`<tr><td colspan="5">${empty('Nenhum lançamento dos membros.')}</td></tr>`}</tbody></table></div></div></section>`;
 }
 function historicoPage(){
- const members=data.membros||[];
+ const members=Array.isArray(data.membros)?data.membros.filter(Boolean):[];
  return `<section class="page" id="page-historico"><div class="section"><div class="section-head"><h2>Histórico do Terreiro</h2></div>${members.map(m=>`<div class="row"><div class="row-main"><b>${esc(m.nome)}</b><small>Mensalidade ${money(m.valor)} · dia ${m.dia}</small></div><button class="link" onclick="memberDetail('${m.id}')">Abrir histórico →</button></div>`).join('')||empty()}</div></section>`;
 }
 function empty(t='Nenhum registro encontrado.'){return `<div class="empty">${t}</div>`}
@@ -296,11 +336,11 @@ function monthOptions(start,end,selected){let s='';for(let y=start;y<=end;y++)fo
 function payButton(kind,id){return `<button class="btn" style="padding:8px 11px;font-size:11px" onclick="payItem('${kind}','${id}')">Pagar</button>`}
 function dateControl(kind,id,value){return `<div class="date-control"><input type="date" value="${value||''}" data-kind="${kind}" data-id="${id}" aria-label="Data de pagamento"><button class="clear-date" type="button" onclick="clearPayment('${kind}','${id}')">×</button></div>`}
 function bindDateEvents(){document.querySelectorAll('input[type=date][data-kind]').forEach(el=>el.addEventListener('change',()=>setPayment(el.dataset.kind,el.dataset.id,el.value||null)))}
-function findItem(kind,id){return kind==='l'?data.lancamentos.find(x=>x.id===id):data.parcelas.find(x=>x.id===id)}
+function findItem(kind,id){const arr=kind==='l'?(Array.isArray(data.lancamentos)?data.lancamentos:[]):(Array.isArray(data.parcelas)?data.parcelas:[]);return arr.find(x=>String(x.id)===String(id))}
 function setPayment(kind,id,val){const x=findItem(kind,id);if(!x)return;x.pagamento=val||null;persist();renderPage();toast(val?'Pagamento registrado':'Data de pagamento apagada')}
 function clearPayment(kind,id){setPayment(kind,id,null)}
 function payItem(kind,id){setPayment(kind,id,today())}
-function repeatLaunch(id){const x=data.lancamentos.find(y=>y.id===id);if(!x)return;openRepeatModal(x)}
+function repeatLaunch(id){const x=(Array.isArray(data.lancamentos)?data.lancamentos:[]).find(y=>String(y.id)===String(id));if(!x)return;openRepeatModal(x)}
 function quickNew(tipo='DESPESA'){openLaunchModal(tipo)}
 function openLaunchModal(tipo='DESPESA'){
  document.getElementById('modalBox').innerHTML=`<div class="modal-head"><h2>Novo lançamento</h2><button class="close" onclick="closeModal()">×</button></div>
@@ -334,7 +374,7 @@ function openRepeatModal(x){
  document.getElementById('modalBox').innerHTML=`<div class="modal-head"><h2>Repetir lançamento</h2><button class="close" onclick="closeModal()">×</button></div><p style="color:var(--muted);font-size:13px;margin-top:0"><b>${esc(x.descricao)}</b> · ${money(x.valor)}</p><form onsubmit="saveRepeat(event,'${x.id}')"><div class="form-group"><label>Quantas vezes?</label><select id="repeatN"><option>2</option><option>3</option><option>6</option><option>12</option><option>24</option></select></div><div style="margin-top:15px"><button class="btn" style="width:100%">Criar repetições</button></div></form>`;
  showModal();
 }
-function saveRepeat(e,id){e.preventDefault();const x=data.lancamentos.find(y=>y.id===id),n=+document.getElementById('repeatN').value;for(let i=1;i<=n;i++){const dt=new Date(x.data+'T12:00:00');dt.setMonth(dt.getMonth()+i);data.lancamentos.unshift({...x,id:'l'+Date.now()+i,data:dt.toISOString().slice(0,10),pagamento:null})}persist();closeModal();renderPage();toast(`${n} repetições criadas`)}
+function saveRepeat(e,id){e.preventDefault();const x=(Array.isArray(data.lancamentos)?data.lancamentos:[]).find(y=>String(y.id)===String(id));if(!x)return;const n=+document.getElementById('repeatN').value;for(let i=1;i<=n;i++){const dt=new Date(x.data+'T12:00:00');dt.setMonth(dt.getMonth()+i);data.lancamentos.unshift({...x,id:'l'+Date.now()+i,data:dt.toISOString().slice(0,10),pagamento:null})}persist();closeModal();renderPage();toast(`${n} repetições criadas`)}
 function openMemberModal(){
  document.getElementById('modalBox').innerHTML=`<div class="modal-head"><h2>Novo membro</h2><button class="close" onclick="closeModal()">×</button></div><form class="form-grid" onsubmit="saveMember(event)"><div class="form-group full"><label>Nome</label><input id="memNome" required></div><div class="form-group"><label>Valor mensal</label><input id="memValor" type="number" min="0" step=".01" required></div><div class="form-group"><label>Dia do vencimento</label><input id="memDia" type="number" min="1" max="31" value="10" required></div><div class="form-group full"><button class="btn gold" style="width:100%">Salvar membro</button></div></form>`;
  showModal();
@@ -342,13 +382,13 @@ function openMemberModal(){
 function saveMember(e){e.preventDefault();data.membros.push({id:'m'+Date.now(),nome:document.getElementById('memNome').value.trim(),valor:+document.getElementById('memValor').value,dia:+document.getElementById('memDia').value,pagamentos:{}});persist();closeModal();renderPage();toast('Membro cadastrado')}
 function memberStatus(m,month){const pg=m.pagamentos?.[month];if(pg)return'PAGO';const [y,mo]=month.split('-').map(Number),day=Math.min(m.dia,new Date(y,mo,0).getDate()),due=`${y}-${String(mo).padStart(2,'0')}-${String(day).padStart(2,'0')}`;return due<today()?'ATRASADO':'EM DIA'}
 function memberPayment(m,month){return m.pagamentos?.[month]||null}
-function payMember(id){const m=data.membros.find(x=>x.id===id);if(!m)return;if(!m.pagamentos)m.pagamentos={};m.pagamentos[state.memberMonth]=today();persist();renderPage();toast(`Mensalidade de ${m.nome} paga`)}
+function payMember(id){const m=(Array.isArray(data.membros)?data.membros:[]).find(x=>String(x.id)===String(id));if(!m)return;if(!m.pagamentos)m.pagamentos={};m.pagamentos[state.memberMonth]=today();persist();renderPage();toast(`Mensalidade de ${m.nome} paga`)}
 function openMemberTxnModal(){
- document.getElementById('modalBox').innerHTML=`<div class="modal-head"><h2>Lançamento do membro</h2><button class="close" onclick="closeModal()">×</button></div><form class="form-grid" onsubmit="saveMemberTxn(event)"><div class="form-group"><label>Membro</label><select id="txMem">${data.membros.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('')}</select></div><div class="form-group"><label>Data</label><input id="txData" type="date" value="${today()}" required></div><div class="form-group"><label>Valor</label><input id="txValor" type="number" step=".01" required></div><div class="form-group"><label>Tipo</label><select id="txTipo"><option>AJUDA</option><option>DOAÇÃO</option><option>OUTRO</option></select></div><div class="form-group full"><label>Descrição</label><input id="txDesc" placeholder="Ex.: ajuda obra" required></div><div class="form-group full"><button class="btn gold" style="width:100%">Salvar lançamento</button></div></form>`;
+ document.getElementById('modalBox').innerHTML=`<div class="modal-head"><h2>Lançamento do membro</h2><button class="close" onclick="closeModal()">×</button></div><form class="form-grid" onsubmit="saveMemberTxn(event)"><div class="form-group"><label>Membro</label><select id="txMem">${(Array.isArray(data.membros)?data.membros:[]).map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('')}</select></div><div class="form-group"><label>Data</label><input id="txData" type="date" value="${today()}" required></div><div class="form-group"><label>Valor</label><input id="txValor" type="number" step=".01" required></div><div class="form-group"><label>Tipo</label><select id="txTipo"><option>AJUDA</option><option>DOAÇÃO</option><option>OUTRO</option></select></div><div class="form-group full"><label>Descrição</label><input id="txDesc" placeholder="Ex.: ajuda obra" required></div><div class="form-group full"><button class="btn gold" style="width:100%">Salvar lançamento</button></div></form>`;
  showModal();
 }
-function saveMemberTxn(e){e.preventDefault();data.lancMembros.push({id:'t'+Date.now(),membroId:document.getElementById('txMem').value,data:document.getElementById('txData').value,valor:+document.getElementById('txValor').value,descricao:document.getElementById('txDesc').value.trim(),tipo:document.getElementById('txTipo').value});persist();closeModal();renderPage();toast('Lançamento do Terreiro salvo')}
-function memberDetail(id){const m=data.membros.find(x=>x.id===id),tx=(data.lancMembros||[]).filter(x=>x.membroId===id).sort((a,b)=>b.data.localeCompare(a.data));if(!m)return;const months=Object.entries(m.pagamentos||{}).sort((a,b)=>b[0].localeCompare(a[0]));document.getElementById('modalBox').innerHTML=`<div class="modal-head"><h2>${esc(m.nome)}</h2><button class="close" onclick="closeModal()">×</button></div><div class="cards" style="grid-template-columns:1fr 1fr"><div class="card"><div class="label">Mensalidade</div><div class="money">${money(m.valor)}</div></div><div class="card"><div class="label">Vencimento</div><div class="money">Dia ${m.dia}</div></div></div><div class="section" style="box-shadow:none"><h3>Pagamentos mensais</h3>${months.map(([mo,d])=>`<div class="row"><span>${monthLabel(mo)}</span><span class="green">${fmt(d)} · PAGO</span></div>`).join('')||empty('Nenhuma mensalidade paga registrada.')}</div><div class="section" style="box-shadow:none"><h3>Outros lançamentos</h3>${tx.map(x=>`<div class="row"><span><b>${esc(x.descricao)}</b><small>${fmt(x.data)} · ${x.tipo}</small></span><b>${money(x.valor)}</b></div>`).join('')||empty('Nenhum outro lançamento.')}</div>`;showModal()}
+function saveMemberTxn(e){e.preventDefault();if(!Array.isArray(data.lancMembros))data.lancMembros=[];data.lancMembros.push({id:'t'+Date.now(),membroId:document.getElementById('txMem').value,data:document.getElementById('txData').value,valor:+document.getElementById('txValor').value,descricao:document.getElementById('txDesc').value.trim(),tipo:document.getElementById('txTipo').value});persist();closeModal();renderPage();toast('Lançamento do Terreiro salvo')}
+function memberDetail(id){const m=(Array.isArray(data.membros)?data.membros:[]).find(x=>x.id===id),tx=(data.lancMembros||[]).filter(x=>x.membroId===id).sort((a,b)=>b.data.localeCompare(a.data));if(!m)return;const months=Object.entries(m.pagamentos||{}).sort((a,b)=>b[0].localeCompare(a[0]));document.getElementById('modalBox').innerHTML=`<div class="modal-head"><h2>${esc(m.nome)}</h2><button class="close" onclick="closeModal()">×</button></div><div class="cards" style="grid-template-columns:1fr 1fr"><div class="card"><div class="label">Mensalidade</div><div class="money">${money(m.valor)}</div></div><div class="card"><div class="label">Vencimento</div><div class="money">Dia ${m.dia}</div></div></div><div class="section" style="box-shadow:none"><h3>Pagamentos mensais</h3>${months.map(([mo,d])=>`<div class="row"><span>${monthLabel(mo)}</span><span class="green">${fmt(d)} · PAGO</span></div>`).join('')||empty('Nenhuma mensalidade paga registrada.')}</div><div class="section" style="box-shadow:none"><h3>Outros lançamentos</h3>${tx.map(x=>`<div class="row"><span><b>${esc(x.descricao)}</b><small>${fmt(x.data)} · ${x.tipo}</small></span><b>${money(x.valor)}</b></div>`).join('')||empty('Nenhum outro lançamento.')}</div>`;showModal()}
 function calendarDay(ds){const items=[...data.lancamentos.filter(x=>x.data===ds),...data.parcelas.filter(x=>x.vencimento===ds)];const d=document.getElementById('calendarDetail');if(!d)return;d.innerHTML=`<div class="detail-list"><h3>Lançamentos de ${fmt(ds)}</h3>${items.map(x=>`<div class="row"><span><b>${esc(x.descricao)}</b><small>${money(x.valor)}</small></span>${pill(status(x))}</div>`).join('')||empty()}</div>`}
 function manageCategories(){document.getElementById('modalBox').innerHTML=`<div class="modal-head"><h2>Categorias</h2><button class="close" onclick="closeModal()">×</button></div><div class="toolbar"><input id="newCat" class="field search" placeholder="Nova categoria"><button class="btn" onclick="addCategory()">Adicionar</button></div><div class="filter-group">${data.categorias.map(c=>`<button class="filter active" onclick="removeCategory('${esc(c)}')">${esc(c)} ×</button>`).join('')}</div>`;showModal()}
 function addCategory(){const v=document.getElementById('newCat').value.trim().toUpperCase();if(v&&!data.categorias.includes(v)){data.categorias.push(v);persist();manageCategories();toast('Categoria adicionada')}}
